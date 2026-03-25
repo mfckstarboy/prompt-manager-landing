@@ -36,7 +36,7 @@ export function Header() {
 
           <div className="hidden items-center gap-3 md:flex">
             <Button asChild variant="ghost" size="sm" className="landing-ui">
-              <Link href="/sign-in">Sign in</Link>
+              <Link href="/login">Sign in</Link>
             </Button>
             <Button size="sm" className="landing-ui gap-2">
               <Chrome className="h-4 w-4" />
@@ -76,7 +76,7 @@ export function Header() {
             </a>
             <hr className="border-border" />
             <Button asChild variant="ghost" size="sm" className="landing-ui justify-start">
-              <Link href="/sign-in">Sign in</Link>
+              <Link href="/login">Sign in</Link>
             </Button>
             <Button size="sm" className="landing-ui gap-2">
               <Chrome className="h-4 w-4" />

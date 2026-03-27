@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import type { Session } from "@supabase/supabase-js";
+import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 
 import { AuthShell } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
@@ -56,7 +56,8 @@ function waitForExtensionSession(supabase: ReturnType<typeof createClient>) {
       resolve(null);
     }, 4000);
 
-    const subscription = supabase.auth.onAuthStateChange((_event, session) => {
+    const subscription = supabase.auth.onAuthStateChange(
+      (_event: AuthChangeEvent, session: Session | null) => {
       console.log("[PromptTray Website] Auth state change observed while waiting for session", {
         event: _event,
         hasSession: Boolean(session),
@@ -69,7 +70,8 @@ function waitForExtensionSession(supabase: ReturnType<typeof createClient>) {
         subscription.data.subscription.unsubscribe();
         resolve(session);
       }
-    });
+      }
+    );
   });
 }
 

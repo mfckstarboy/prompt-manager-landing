@@ -6,6 +6,11 @@ import { Suspense, type FormEvent, useMemo, useState } from "react";
 
 import { AuthShell, authInputClassName, authLabelClassName } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
+import {
+  buildExtensionSuccessPath,
+  getExtensionBridgeState,
+  withExtensionBridge,
+} from "@/lib/auth/extension-bridge";
 import { createClient } from "@/lib/supabase/client";
 
 function LoginPageContent() {
@@ -19,6 +24,8 @@ function LoginPageContent() {
 
   const isValid = email.trim().length > 0 && password.trim().length > 0;
   const signupSuccess = searchParams.get("signup") === "success";
+  const { extensionId, isExtensionFlow } = getExtensionBridgeState(searchParams);
+  const signupHref = withExtensionBridge("/signup", extensionId);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -36,7 +43,9 @@ function LoginPageContent() {
         return;
       }
 
-      router.push("/app");
+      router.push(
+        isExtensionFlow ? buildExtensionSuccessPath(extensionId, "login") : "/app"
+      );
       router.refresh();
     } catch (caughtError) {
       const message =
@@ -50,11 +59,16 @@ function LoginPageContent() {
   return (
     <AuthShell
       title="Welcome back"
-      description="Log in to access your synced prompts."
+      description={
+        isExtensionFlow
+          ? "Log in on the website and PromptTray in Chrome will connect automatically."
+          : "Log in to access your synced prompts."
+      }
       alternateQuestion="Need an account?"
       alternateLabel="Create account"
-      alternateHref="/signup"
+      alternateHref={signupHref}
       hintText=""
+      eyebrow={isExtensionFlow ? "Extension login" : undefined}
     >
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div className="grid gap-4">
@@ -108,7 +122,10 @@ function LoginPageContent() {
         </Button>
 
         <p className="landing-small text-center text-muted-foreground">
-          <Link href="/forgot-password" className="font-medium text-foreground hover:text-primary">
+          <Link
+            href={withExtensionBridge("/forgot-password", extensionId)}
+            className="font-medium text-foreground hover:text-primary"
+          >
             Forgot password?
           </Link>
         </p>

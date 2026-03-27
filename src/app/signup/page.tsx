@@ -1,15 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { type FormEvent, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, type FormEvent, useMemo, useState } from "react";
 
 import { AuthShell, authInputClassName, authLabelClassName } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
+import {
+  buildExtensionSuccessPath,
+  getExtensionBridgeState,
+  withExtensionBridge,
+} from "@/lib/auth/extension-bridge";
 import { createClient } from "@/lib/supabase/client";
 
-export default function SignupPage() {
+function SignupPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = useMemo(() => createClient(), []);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,6 +23,8 @@ export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const isValid = email.trim().length > 0 && password.trim().length > 0;
+  const { extensionId, isExtensionFlow } = getExtensionBridgeState(searchParams);
+  const loginHref = withExtensionBridge("/login", extensionId);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -24,7 +32,7 @@ export default function SignupPage() {
     setIsLoading(true);
 
     try {
-      const { error: signUpError } = await supabase.auth.signUp({
+      const { data, error: signUpError } = await supabase.auth.signUp({
         email: email.trim(),
         password,
       });
@@ -34,7 +42,13 @@ export default function SignupPage() {
         return;
       }
 
-      router.push("/login?signup=success");
+      if (isExtensionFlow && data.session) {
+        router.push(buildExtensionSuccessPath(extensionId, "signup"));
+      } else if (isExtensionFlow) {
+        router.push(withExtensionBridge("/login", extensionId, { signup: "success" }));
+      } else {
+        router.push("/login?signup=success");
+      }
       router.refresh();
     } catch (caughtError) {
       const message =
@@ -48,11 +62,16 @@ export default function SignupPage() {
   return (
     <AuthShell
       title="Create your account"
-      description="Create an account to save and sync your prompts."
+      description={
+        isExtensionFlow
+          ? "Create your account on the website and PromptTray in Chrome will connect automatically."
+          : "Create an account to save and sync your prompts."
+      }
       alternateQuestion="Already have an account?"
       alternateLabel="Log in"
-      alternateHref="/login"
+      alternateHref={loginHref}
       hintText=""
+      eyebrow={isExtensionFlow ? "Extension sign up" : undefined}
     >
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div className="grid gap-4">
@@ -112,5 +131,13 @@ export default function SignupPage() {
         </p>
       </form>
     </AuthShell>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignupPageContent />
+    </Suspense>
   );
 }

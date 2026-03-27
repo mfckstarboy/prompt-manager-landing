@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-
-import DashboardPage from "@/components/dashboard/dashboard-page";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Dashboard | PromptTray",
@@ -8,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function DashboardRoute() {
-  return <DashboardPage />;
+  redirect("/app");
 }

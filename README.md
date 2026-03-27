@@ -1,36 +1,37 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PromptTray Web
 
-## Getting Started
+PromptTray is a Next.js + Supabase website for authentication, dashboard access, and Chrome extension handoff.
 
-First, run the development server:
+## Local development
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Create a local `.env.local` with:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```env
+NEXT_PUBLIC_SITE_URL=http://localhost:3001
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+NEXT_PUBLIC_CHROME_EXTENSION_ID=
+NEXT_PUBLIC_CHROME_EXTENSION_ID_DEV=
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## MVP production checklist
 
-## Learn More
+- Set `NEXT_PUBLIC_SITE_URL` to your production domain in Vercel.
+- Set `NEXT_PUBLIC_CHROME_EXTENSION_ID` to the production Chrome extension ID.
+- Optionally set `NEXT_PUBLIC_CHROME_EXTENSION_ID_DEV` for local development.
+- Run the SQL in [supabase/mvp-prompts.sql](/Users/denispetrenko/Documents/PromptManager/prompt-manager-landing/supabase/mvp-prompts.sql) in the production Supabase project.
+- Confirm `public.prompts` and `public.categories` both have RLS enabled in Supabase.
+- Confirm all four CRUD policies from the SQL file are active for both tables.
+- Enable Supabase email confirmation for production signups.
+- Add your production reset-password URL to Supabase Auth redirect URLs:
+  `https://your-domain/reset-password`
 
-To learn more about Next.js, take a look at the following resources:
+## Notes
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- The website dashboard also scopes reads by `user_id`, but production safety still depends on RLS being enabled in Supabase.
+- The extension handoff now only trusts allowlisted extension IDs from environment variables.

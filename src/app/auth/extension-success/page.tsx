@@ -31,14 +31,29 @@ type ChromeRuntimeBridge = {
   };
 };
 
+const debugExtensionHandoff = process.env.NODE_ENV !== "production";
+
+function debugLog(message: string, payload?: unknown) {
+  if (!debugExtensionHandoff) {
+    return;
+  }
+
+  if (typeof payload === "undefined") {
+    console.log(message);
+    return;
+  }
+
+  console.log(message, payload);
+}
+
 function waitForExtensionSession(supabase: ReturnType<typeof createClient>) {
   return new Promise<Session | null>(async (resolve) => {
-    console.log("[PromptTray Website] Session fetch started");
+    debugLog("[PromptTray Website] Session fetch started");
 
     const initialResult = await supabase.auth.getSession();
     const initialSession = initialResult.data.session;
 
-    console.log("[PromptTray Website] Session fetch result", {
+    debugLog("[PromptTray Website] Session fetch result", {
       error: initialResult.error?.message || null,
       hasSession: Boolean(initialSession),
       userEmail: initialSession?.user?.email || "",
@@ -52,24 +67,24 @@ function waitForExtensionSession(supabase: ReturnType<typeof createClient>) {
 
     const timeoutId = window.setTimeout(() => {
       subscription.data.subscription.unsubscribe();
-      console.log("[PromptTray Website] No session available for extension handoff");
+      debugLog("[PromptTray Website] No session available for extension handoff");
       resolve(null);
     }, 4000);
 
     const subscription = supabase.auth.onAuthStateChange(
       (_event: AuthChangeEvent, session: Session | null) => {
-      console.log("[PromptTray Website] Auth state change observed while waiting for session", {
-        event: _event,
-        hasSession: Boolean(session),
-        userEmail: session?.user?.email || "",
-        userId: session?.user?.id || "",
-      });
+        debugLog("[PromptTray Website] Auth state change observed while waiting for session", {
+          event: _event,
+          hasSession: Boolean(session),
+          userEmail: session?.user?.email || "",
+          userId: session?.user?.id || "",
+        });
 
-      if (session?.access_token && session.refresh_token) {
-        window.clearTimeout(timeoutId);
-        subscription.data.subscription.unsubscribe();
-        resolve(session);
-      }
+        if (session?.access_token && session.refresh_token) {
+          window.clearTimeout(timeoutId);
+          subscription.data.subscription.unsubscribe();
+          resolve(session);
+        }
       }
     );
   });
@@ -89,19 +104,19 @@ function sendSessionToExtension(extensionId: string, session: Session) {
       return;
     }
 
-    console.log("[PromptTray Website] Preparing auth message", {
+    debugLog("[PromptTray Website] Preparing auth message", {
       extensionId,
       messageType: message.type,
       payloadKeys: Object.keys(message),
       sessionKeys: Object.keys(session),
       userKeys: Object.keys(session.user),
     });
-    console.log("[PromptTray Website] EXECUTING REAL AUTH HANDOFF", {
+    debugLog("[PromptTray Website] EXECUTING REAL AUTH HANDOFF", {
       extId: extensionId,
       messageType: message.type,
       sessionKeys: Object.keys(session),
     });
-    console.log("[PromptTray Website] Calling chrome.runtime.sendMessage", {
+    debugLog("[PromptTray Website] Calling chrome.runtime.sendMessage", {
       extensionId,
       messageType: message.type,
     });
@@ -110,12 +125,12 @@ function sendSessionToExtension(extensionId: string, session: Session) {
       runtime.sendMessage(extensionId, message, (response) => {
         const lastError = runtime.lastError;
 
-        console.log("[PromptTray Website] Callback fired", {
+        debugLog("[PromptTray Website] Callback fired", {
           callbackFired: true,
           messageType: message.type,
           response,
         });
-        console.log("[PromptTray Website] chrome.runtime.lastError", lastError?.message || null);
+        debugLog("[PromptTray Website] chrome.runtime.lastError", lastError?.message || null);
 
         if (lastError?.message) {
           reject(new Error(lastError.message));
@@ -143,28 +158,38 @@ function ExtensionSuccessContent() {
     message: "Connecting your website session to PromptTray in Chrome...",
     status: "loading",
   });
-  const { extensionId, isExtensionFlow } = getExtensionBridgeState(searchParams);
+  const { extensionId, hasExtensionSource, isExtensionFlow, isInvalidExtensionId, isMissingExtensionId } =
+    getExtensionBridgeState(searchParams);
   const mode = searchParams.get("mode") === "signup" ? "signup" : "login";
 
   useEffect(() => {
     async function connectExtension() {
-      console.log("[PromptTray Website] Extension success page mounted");
+      debugLog("[PromptTray Website] Extension success page mounted");
 
-      if (!isExtensionFlow) {
-        console.log("[PromptTray Website] Missing ext_id for extension handoff");
+      if (hasExtensionSource && isInvalidExtensionId) {
         setState({
-          message: "Missing extension connection details. Please start again from PromptTray.",
+          message: "PromptTray could not verify the Chrome extension connection. Please start again from the extension.",
           status: "error",
         });
         return;
       }
 
-      console.log("[PromptTray Website] ext_id found", { extensionId, mode });
+      if (!isExtensionFlow) {
+        setState({
+          message: isMissingExtensionId
+            ? "Missing extension connection details. Please start again from PromptTray."
+            : "PromptTray could not verify the Chrome extension connection. Please start again from the extension.",
+          status: "error",
+        });
+        return;
+      }
+
+      debugLog("[PromptTray Website] ext_id found", { extensionId, mode });
 
       const session = await waitForExtensionSession(supabase);
 
       if (!session?.access_token || !session.refresh_token) {
-        console.log("[PromptTray Website] Handoff stopped because no usable session was available", {
+        debugLog("[PromptTray Website] Handoff stopped because no usable session was available", {
           hasAccessToken: Boolean(session?.access_token),
           hasRefreshToken: Boolean(session?.refresh_token),
           hasSession: Boolean(session),
@@ -177,12 +202,12 @@ function ExtensionSuccessContent() {
       }
 
       try {
-        console.log("[PromptTray Website] Actual session object shape", {
+        debugLog("[PromptTray Website] Actual session object shape", {
           sessionType: typeof session,
           sessionKeys: Object.keys(session || {}),
           userKeys: Object.keys(session.user || {}),
         });
-        console.log("[PromptTray Website] Preparing auth session for extension handoff", {
+        debugLog("[PromptTray Website] Preparing auth session for extension handoff", {
           extensionId,
           hasAccessToken: Boolean(session.access_token),
           hasRefreshToken: Boolean(session.refresh_token),
@@ -225,7 +250,15 @@ function ExtensionSuccessContent() {
     }
 
     connectExtension();
-  }, [extensionId, isExtensionFlow, mode, supabase]);
+  }, [
+    extensionId,
+    hasExtensionSource,
+    isExtensionFlow,
+    isInvalidExtensionId,
+    isMissingExtensionId,
+    mode,
+    supabase,
+  ]);
 
   return (
     <AuthShell

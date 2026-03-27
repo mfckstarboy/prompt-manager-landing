@@ -44,10 +44,12 @@ function SignupPageContent() {
 
       if (isExtensionFlow && data.session) {
         router.push(buildExtensionSuccessPath(extensionId, "signup"));
-      } else if (isExtensionFlow) {
-        router.push(withExtensionBridge("/login", extensionId, { signup: "success" }));
-      } else {
+      } else if (data.session) {
         router.push("/login?signup=success");
+      } else if (isExtensionFlow) {
+        router.push(withExtensionBridge("/login", extensionId, { signup: "check-email" }));
+      } else {
+        router.push("/login?signup=check-email");
       }
       router.refresh();
     } catch (caughtError) {

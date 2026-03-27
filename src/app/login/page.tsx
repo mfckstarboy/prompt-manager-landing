@@ -24,6 +24,7 @@ function LoginPageContent() {
 
   const isValid = email.trim().length > 0 && password.trim().length > 0;
   const signupSuccess = searchParams.get("signup") === "success";
+  const signupNeedsConfirmation = searchParams.get("signup") === "check-email";
   const { extensionId, isExtensionFlow } = getExtensionBridgeState(searchParams);
   const signupHref = withExtensionBridge("/signup", extensionId);
 
@@ -108,6 +109,10 @@ function LoginPageContent() {
         {signupSuccess ? (
           <p className="landing-small rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-700">
             Account created. Log in with your email and password.
+          </p>
+        ) : signupNeedsConfirmation ? (
+          <p className="landing-small rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-700">
+            Check your email to confirm your account, then return here to log in.
           </p>
         ) : null}
 

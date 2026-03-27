@@ -86,12 +86,17 @@ export default async function AppPage() {
 
   const [{ data: categories, error: categoriesError }, { data: prompts, error: promptsError }] =
     await Promise.all([
-      supabase.from("categories").select("id, name").order("name", { ascending: true }),
+      supabase
+        .from("categories")
+        .select("id, name")
+        .eq("user_id", user.id)
+        .order("name", { ascending: true }),
       supabase
         .from("prompts")
         .select(
           "id, title, content, created_at, category:categories!prompts_category_id_fkey(id, name)"
         )
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false }),
     ]);
 

@@ -25,7 +25,7 @@ export default function ResetPasswordSuccessPage() {
         </div>
 
         <Button asChild className="landing-ui h-12 w-full">
-          <Link href="/sign-in">Go to login</Link>
+          <Link href="/login">Go to login</Link>
         </Button>
       </div>
     </AuthShell>

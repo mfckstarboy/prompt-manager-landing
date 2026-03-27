@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, type FormEvent, useMemo, useState } from "react";
+import { Suspense, type FormEvent, useEffect, useMemo, useState } from "react";
 
 import { AuthShell, authInputClassName, authLabelClassName } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
@@ -23,12 +23,43 @@ function SignupPageContent() {
   const [isLoading, setIsLoading] = useState(false);
 
   const isValid = email.trim().length > 0 && password.trim().length > 0;
-  const { extensionId, isExtensionFlow } = getExtensionBridgeState(searchParams);
+  const {
+    extensionId,
+    hasExtensionSource,
+    isExtensionFlow,
+    isInvalidExtensionId,
+    isMissingExtensionId,
+    rawExtensionId,
+  } = getExtensionBridgeState(searchParams);
   const loginHref = withExtensionBridge("/login", extensionId);
+
+  useEffect(() => {
+    if (!hasExtensionSource) {
+      return;
+    }
+
+    console.info("[TEMP handoff debug] /signup extension bridge state", {
+      extIdAllowed: isExtensionFlow,
+      extIdReceived: rawExtensionId,
+      isInvalidExtensionId,
+      isMissingExtensionId,
+      route: "/signup",
+    });
+  }, [hasExtensionSource, isExtensionFlow, isInvalidExtensionId, isMissingExtensionId, rawExtensionId]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
+
+    if (hasExtensionSource && !isExtensionFlow) {
+      setError(
+        isMissingExtensionId
+          ? "PromptTray is missing the extension connection details. Start again from the extension."
+          : "PromptTray could not verify this Chrome extension connection. Check the extension ID configuration and try again."
+      );
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -109,6 +140,14 @@ function SignupPageContent() {
             />
           </div>
         </div>
+
+        {hasExtensionSource && !isExtensionFlow ? (
+          <p className="landing-small rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-red-600">
+            {isMissingExtensionId
+              ? "PromptTray did not receive the extension connection details."
+              : "PromptTray could not verify this Chrome extension connection."}
+          </p>
+        ) : null}
 
         {error ? (
           <p className="landing-small rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-red-600">

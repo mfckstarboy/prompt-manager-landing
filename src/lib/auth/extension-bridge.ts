@@ -6,6 +6,7 @@ export type ExtensionBridgeState = {
   isInvalidExtensionId: boolean;
   isExtensionFlow: boolean;
   isMissingExtensionId: boolean;
+  rawExtensionId: string;
 };
 
 type SearchParamsLike = {
@@ -30,19 +31,20 @@ export function isAllowedExtensionId(extensionId: string) {
 }
 
 export function getExtensionBridgeState(searchParams: SearchParamsLike): ExtensionBridgeState {
-  const extensionId = searchParams.get("ext_id")?.trim() ?? "";
+  const rawExtensionId = searchParams.get("ext_id")?.trim() ?? "";
   const source = searchParams.get("source")?.trim() ?? "";
   const hasExtensionSource = source === EXTENSION_SOURCE;
-  const extensionIdAllowed = isAllowedExtensionId(extensionId);
-  const isMissingExtensionId = hasExtensionSource && extensionId.length === 0;
-  const isInvalidExtensionId = hasExtensionSource && extensionId.length > 0 && !extensionIdAllowed;
+  const extensionIdAllowed = isAllowedExtensionId(rawExtensionId);
+  const isMissingExtensionId = hasExtensionSource && rawExtensionId.length === 0;
+  const isInvalidExtensionId = hasExtensionSource && rawExtensionId.length > 0 && !extensionIdAllowed;
 
   return {
-    extensionId: extensionIdAllowed ? extensionId : "",
+    extensionId: extensionIdAllowed ? rawExtensionId : "",
     hasExtensionSource,
     isInvalidExtensionId,
     isExtensionFlow: hasExtensionSource && extensionIdAllowed,
     isMissingExtensionId,
+    rawExtensionId,
   };
 }
 

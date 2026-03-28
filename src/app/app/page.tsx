@@ -4,10 +4,10 @@ import {
   ArrowUpRight,
   CheckCircle2,
   Download,
-  FolderOpen,
   LayoutGrid,
+  LifeBuoy,
   Puzzle,
-  ShieldCheck,
+  UserRound,
 } from "lucide-react";
 
 import { PromptTrayLogo } from "@/components/landing/prompttray-logo";
@@ -154,12 +154,12 @@ export default async function AppPage() {
                   Welcome back
                 </h1>
                 <p className="landing-body mt-4 max-w-xl text-muted-foreground md:text-lg">
-                  Your prompts are saved through the Chrome extension and stay linked to{" "}
+                  PromptTray works inside ChatGPT through the extension sidebar and stays linked to{" "}
                   {user.email ?? "your account"}.
                 </p>
                 <p className="landing-small mt-3 text-muted-foreground">
-                  Use this dashboard to check sync status, review your prompt library, and keep
-                  your account in view.
+                  Use this dashboard for your account, sync status, and overview while ChatGPT
+                  stays your main workspace for prompts.
                 </p>
               </div>
 
@@ -176,7 +176,7 @@ export default async function AppPage() {
                   </Button>
                 ) : (
                   <Button asChild variant="outline" className="landing-ui h-12 px-6">
-                    <a href="#prompts-overview">View prompt library</a>
+                    <Link href="/account">Manage Account</Link>
                   </Button>
                 )}
               </div>
@@ -198,8 +198,8 @@ export default async function AppPage() {
                       Extension status
                     </h2>
                     <p className="landing-body mt-2 text-muted-foreground">
-                      The website is your account hub. Prompts are created and saved from the
-                      extension while you work in ChatGPT.
+                      This dashboard is your account hub. Prompt creation and management happen
+                      inside ChatGPT through the PromptTray sidebar.
                     </p>
                   </div>
                   <div className="rounded-full bg-accent p-3 text-primary">
@@ -254,11 +254,12 @@ export default async function AppPage() {
                       Prompts overview
                     </h2>
                     <p className="landing-body mt-2 text-muted-foreground">
-                      A quick read-only snapshot of the prompts already attached to your account.
+                      A read-only snapshot of the prompts already synced from your PromptTray
+                      sidebar in ChatGPT.
                     </p>
                   </div>
                   <div className="rounded-full bg-secondary p-3 text-foreground">
-                    <FolderOpen className="h-5 w-5" />
+                    <LayoutGrid className="h-5 w-5" />
                   </div>
                 </div>
 
@@ -289,8 +290,8 @@ export default async function AppPage() {
                   <div className="mt-6 rounded-2xl border border-dashed border-border bg-background px-5 py-6">
                     <h3 className="landing-h4 text-base text-foreground">No synced prompts yet</h3>
                     <p className="landing-body mt-2 max-w-2xl text-muted-foreground">
-                      Prompts are created and saved inside the Chrome extension. Once you save your
-                      first prompt there, your account overview will update automatically here.
+                      Save your first prompt from the PromptTray sidebar in ChatGPT and your
+                      account overview will update here automatically.
                     </p>
                     <div className="mt-4 flex flex-col gap-3 sm:flex-row">
                       <Button asChild className="landing-ui h-11 gap-2 px-5">
@@ -346,7 +347,7 @@ export default async function AppPage() {
                       Quick actions
                     </h2>
                     <p className="landing-body mt-2 text-muted-foreground">
-                      Shortcuts for the main things you will do from the account side.
+                      Shortcuts for the account side while PromptTray stays focused inside ChatGPT.
                     </p>
                   </div>
                   <div className="rounded-full bg-secondary p-3 text-foreground">
@@ -370,28 +371,28 @@ export default async function AppPage() {
                         <p className="landing-small mt-1 text-muted-foreground">
                           Launch ChatGPT and use PromptTray where prompts are actually created.
                         </p>
-                      </div>
+                        </div>
                     </div>
                     <ArrowUpRight className="h-4 w-4 text-muted-foreground transition-colors duration-200 group-hover:text-foreground" />
                   </Link>
 
-                  <a
-                    href="#prompts-overview"
+                  <Link
+                    href="/account"
                     className="group flex items-center justify-between rounded-2xl border border-border bg-background px-4 py-4 text-left transition-[transform,box-shadow,border-color,background-color] duration-200 ease-out hover:-translate-y-0.5 hover:border-foreground/12 hover:shadow-[0_18px_34px_-28px_rgba(15,23,42,0.24)]"
                   >
                     <div className="flex items-start gap-3">
                       <div className="rounded-xl bg-accent p-2.5 text-primary transition-colors duration-200 group-hover:bg-primary group-hover:text-white">
-                        <FolderOpen className="h-4 w-4" />
+                        <UserRound className="h-4 w-4" />
                       </div>
                       <div>
-                        <p className="landing-h4 text-base">View prompt library</p>
+                        <p className="landing-h4 text-base">Manage account</p>
                         <p className="landing-small mt-1 text-muted-foreground">
-                          Review your saved prompts and categories without editing them here.
+                          Review your account details, connection status, and sign-out settings.
                         </p>
                       </div>
                     </div>
                     <ArrowUpRight className="h-4 w-4 text-muted-foreground transition-colors duration-200 group-hover:text-foreground" />
-                  </a>
+                  </Link>
 
                   <Link
                     href="/support"
@@ -399,12 +400,12 @@ export default async function AppPage() {
                   >
                     <div className="flex items-start gap-3">
                       <div className="rounded-xl bg-accent p-2.5 text-primary transition-colors duration-200 group-hover:bg-primary group-hover:text-white">
-                        <ShieldCheck className="h-4 w-4" />
+                        <LifeBuoy className="h-4 w-4" />
                       </div>
                       <div>
-                        <p className="landing-h4 text-base">Manage account</p>
+                        <p className="landing-h4 text-base">Help</p>
                         <p className="landing-small mt-1 text-muted-foreground">
-                          Get help with access, setup, and account questions.
+                          Get setup guidance, troubleshooting help, and support details.
                         </p>
                       </div>
                     </div>
@@ -424,8 +425,8 @@ export default async function AppPage() {
                   Your prompts stay with you
                 </h2>
                 <p className="landing-body mt-4 max-w-md text-background/75">
-                  Saved prompts stay connected to your account. Reinstalling the extension does not
-                  remove what is already stored in PromptTray.
+                  Saved prompts stay connected to your account while ChatGPT remains your workspace.
+                  Reinstalling the extension does not remove what is already synced to PromptTray.
                 </p>
               </section>
 

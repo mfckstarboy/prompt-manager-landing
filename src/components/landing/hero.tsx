@@ -49,7 +49,7 @@ export function Hero() {
         <Reveal className="mx-auto mb-16 max-w-3xl text-center" variant="fade-up" delay={160}>
           <div className="landing-label mb-6 inline-flex items-center gap-2 rounded-full bg-accent px-3 py-1.5 text-accent-foreground">
             <Sparkles className="h-4 w-4 text-primary" />
-            Works with ChatGPT, Claude, Gemini & more
+            Works with ChatGPT · more integrations coming
           </div>
 
           <h1 className="landing-h1 mb-6 text-balance">

@@ -3,15 +3,15 @@ import type { Metadata } from "next";
 import { LegalSection, LegalShell } from "@/components/legal/legal-shell";
 
 export const metadata: Metadata = {
-  title: "Support | PromptTray",
-  description: "PromptTray support and contact information.",
+  title: "Help | PromptTray",
+  description: "PromptTray help, setup guidance, and contact information.",
 };
 
 export default function SupportPage() {
   return (
     <LegalShell
-      title="Support"
-      description="If you need help with PromptTray, send us a message and we’ll point you in the right direction."
+      title="Help"
+      description="If you need help with PromptTray, start here for setup guidance, troubleshooting, and support."
     >
       <LegalSection title="Contact">
         <p>
@@ -32,15 +32,17 @@ export default function SupportPage() {
           <div>
             <p className="font-medium text-foreground">How do I install PromptTray?</p>
             <p className="mt-2">
-              Install the extension, sign in, and PromptTray will be available inside supported AI
-              tools.
+              Install the extension, open ChatGPT, and sign in when PromptTray asks you to connect
+              your account. You can start sign up or login from the extension sidebar or from the
+              PromptTray website, and PromptTray appears inside ChatGPT and syncs your saved
+              prompts with your account.
             </p>
           </div>
           <div>
             <p className="font-medium text-foreground">Can I edit or delete saved prompts?</p>
             <p className="mt-2">
-              Yes. You can update, organize, or remove saved prompts from your PromptTray library
-              at any time.
+              Yes. Prompt editing, organizing, and deleting happen inside the PromptTray sidebar
+              while you work in ChatGPT.
             </p>
           </div>
           <div>

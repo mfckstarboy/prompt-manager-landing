@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, type FormEvent, useEffect, useMemo, useState } from "react";
+import { Suspense, type FormEvent, useMemo, useState } from "react";
 
 import { AuthShell, authInputClassName, authLabelClassName } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
@@ -29,23 +29,8 @@ function SignupPageContent() {
     isExtensionFlow,
     isInvalidExtensionId,
     isMissingExtensionId,
-    rawExtensionId,
   } = getExtensionBridgeState(searchParams);
   const loginHref = withExtensionBridge("/login", extensionId);
-
-  useEffect(() => {
-    if (!hasExtensionSource) {
-      return;
-    }
-
-    console.info("[TEMP handoff debug] /signup extension bridge state", {
-      extIdAllowed: isExtensionFlow,
-      extIdReceived: rawExtensionId,
-      isInvalidExtensionId,
-      isMissingExtensionId,
-      route: "/signup",
-    });
-  }, [hasExtensionSource, isExtensionFlow, isInvalidExtensionId, isMissingExtensionId, rawExtensionId]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

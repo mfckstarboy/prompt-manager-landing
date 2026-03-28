@@ -13,11 +13,17 @@ type SearchParamsLike = {
   get(name: string): string | null;
 };
 
+function getRawAllowedExtensionIds() {
+  return {
+    dev: process.env.NEXT_PUBLIC_CHROME_EXTENSION_ID_DEV,
+    prod: process.env.NEXT_PUBLIC_CHROME_EXTENSION_ID,
+  };
+}
+
 function getAllowedExtensionIds() {
-  return [
-    process.env.NEXT_PUBLIC_CHROME_EXTENSION_ID,
-    process.env.NEXT_PUBLIC_CHROME_EXTENSION_ID_DEV,
-  ]
+  const rawIds = getRawAllowedExtensionIds();
+
+  return [rawIds.prod, rawIds.dev]
     .map((value) => value?.trim() ?? "")
     .filter(Boolean);
 }
@@ -31,10 +37,12 @@ export function isAllowedExtensionId(extensionId: string) {
 }
 
 export function getExtensionBridgeState(searchParams: SearchParamsLike): ExtensionBridgeState {
-  const rawExtensionId = searchParams.get("ext_id")?.trim() ?? "";
+  const rawReceivedExtensionId = searchParams.get("ext_id");
+  const rawExtensionId = rawReceivedExtensionId?.trim() ?? "";
   const source = searchParams.get("source")?.trim() ?? "";
   const hasExtensionSource = source === EXTENSION_SOURCE;
-  const extensionIdAllowed = isAllowedExtensionId(rawExtensionId);
+  const normalizedAllowlist = getAllowedExtensionIds();
+  const extensionIdAllowed = normalizedAllowlist.includes(rawExtensionId);
   const isMissingExtensionId = hasExtensionSource && rawExtensionId.length === 0;
   const isInvalidExtensionId = hasExtensionSource && rawExtensionId.length > 0 && !extensionIdAllowed;
 

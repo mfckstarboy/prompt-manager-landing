@@ -4,9 +4,15 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 
-export function LogoutButton() {
+type LogoutButtonProps = {
+  className?: string;
+  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+};
+
+export function LogoutButton({ className, variant = "outline" }: LogoutButtonProps) {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
   const [isLoading, setIsLoading] = useState(false);
@@ -24,7 +30,12 @@ export function LogoutButton() {
   };
 
   return (
-    <Button variant="outline" onClick={handleLogout} disabled={isLoading}>
+    <Button
+      variant={variant}
+      onClick={handleLogout}
+      disabled={isLoading}
+      className={cn(className)}
+    >
       {isLoading ? "Logging out..." : "Log out"}
     </Button>
   );

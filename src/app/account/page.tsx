@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowUpRight, CheckCircle2, LifeBuoy, Mail, Puzzle } from "lucide-react";
+import { ArrowUpRight, CheckCircle2, LifeBuoy, Puzzle } from "lucide-react";
 
 import { PromptTrayLogo } from "@/components/landing/prompttray-logo";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 
+import { AccountSettingsForm } from "./account-settings-form";
 import { LogoutButton } from "../app/logout-button";
 
 export const metadata: Metadata = {
@@ -65,23 +66,6 @@ export default async function AccountRoute() {
               <div className="rounded-2xl border border-border bg-background px-5 py-5">
                 <div className="flex items-start gap-3">
                   <div className="rounded-xl bg-accent p-2.5 text-primary">
-                    <Mail className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <p className="landing-label text-muted-foreground">Email</p>
-                    <p className="landing-h4 mt-1 text-base text-foreground">
-                      {user.email ?? "No email available"}
-                    </p>
-                    <p className="landing-small mt-2 text-muted-foreground">
-                      This is the account connected to PromptTray sync.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-border bg-background px-5 py-5">
-                <div className="flex items-start gap-3">
-                  <div className="rounded-xl bg-accent p-2.5 text-primary">
                     <CheckCircle2 className="h-4 w-4" />
                   </div>
                   <div>
@@ -112,6 +96,8 @@ export default async function AccountRoute() {
                 </div>
               </div>
             </div>
+
+            <AccountSettingsForm initialEmail={user.email ?? ""} />
           </section>
 
           <div className="space-y-6">
@@ -154,7 +140,9 @@ export default async function AccountRoute() {
                 your PromptTray account.
               </p>
               <div className="mt-6">
-                <LogoutButton />
+                <LogoutButton
+                  className="h-11 border-red-200 bg-transparent px-5 text-red-600 shadow-none hover:bg-red-50 hover:text-red-700 hover:shadow-none"
+                />
               </div>
             </section>
           </div>

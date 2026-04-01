@@ -80,3 +80,7 @@ export function withExtensionBridge(
 export function buildExtensionSuccessPath(extensionId: string, mode: "login" | "signup") {
   return withExtensionBridge("/auth/extension-success", extensionId, { mode });
 }
+
+export function buildConfirmedPath(extensionId: string) {
+  return withExtensionBridge("/auth/confirmed", extensionId);
+}

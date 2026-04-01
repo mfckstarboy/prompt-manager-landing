@@ -23,7 +23,8 @@ NEXT_PUBLIC_CHROME_EXTENSION_ID_DEV=
 
 - Set `NEXT_PUBLIC_SITE_URL` to your production domain in Vercel.
 - Set `NEXT_PUBLIC_CHROME_EXTENSION_ID` to the production Chrome extension ID.
-- Optionally set `NEXT_PUBLIC_CHROME_EXTENSION_ID_DEV` for local development.
+- Set `NEXT_PUBLIC_CHROME_EXTENSION_ID_DEV` to the stable unpacked dev ID when using local extension auth handoff.
+  Current stable dev ID: `kigdchcighhogdggknaceodkpddjogbp`
 - Run the SQL in [supabase/mvp-prompts.sql](/Users/denispetrenko/Documents/PromptManager/prompt-manager-landing/supabase/mvp-prompts.sql) in the production Supabase project.
 - Confirm `public.prompts` and `public.categories` both have RLS enabled in Supabase.
 - Confirm all four CRUD policies from the SQL file are active for both tables.

@@ -7,10 +7,12 @@ import { Suspense, type FormEvent, useMemo, useState } from "react";
 import { AuthShell, authInputClassName, authLabelClassName } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
 import {
+  buildConfirmedPath,
   buildExtensionSuccessPath,
   getExtensionBridgeState,
   withExtensionBridge,
 } from "@/lib/auth/extension-bridge";
+import { getSiteUrl } from "@/lib/site-url";
 import { createClient } from "@/lib/supabase/client";
 
 function SignupPageContent() {
@@ -27,7 +29,6 @@ function SignupPageContent() {
     extensionId,
     hasExtensionSource,
     isExtensionFlow,
-    isInvalidExtensionId,
     isMissingExtensionId,
   } = getExtensionBridgeState(searchParams);
   const loginHref = withExtensionBridge("/login", extensionId);
@@ -48,9 +49,13 @@ function SignupPageContent() {
     setIsLoading(true);
 
     try {
+      const emailRedirectTo = `${getSiteUrl()}${buildConfirmedPath(extensionId)}`;
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: email.trim(),
         password,
+        options: {
+          emailRedirectTo,
+        },
       });
 
       if (signUpError) {

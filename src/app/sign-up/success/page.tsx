@@ -6,7 +6,7 @@ import { AuthShell } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "Account Created | PromptTray",
+  title: "Account Created",
   description: "Your PromptTray account has been created successfully.",
 };
 

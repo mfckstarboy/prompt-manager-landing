@@ -11,7 +11,7 @@ import { AccountSettingsForm } from "./account-settings-form";
 import { LogoutButton } from "../app/logout-button";
 
 export const metadata: Metadata = {
-  title: "Manage Account | PromptTray",
+  title: "Manage Account",
   description: "Manage your PromptTray account and connection details.",
 };
 

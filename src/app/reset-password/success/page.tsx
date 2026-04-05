@@ -6,7 +6,7 @@ import { AuthShell } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "Password Updated | PromptTray",
+  title: "Password Updated",
   description: "Your PromptTray password has been updated successfully.",
 };
 

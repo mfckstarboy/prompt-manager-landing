@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { LegalSection, LegalShell } from "@/components/legal/legal-shell";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | PromptTray",
+  title: "Privacy Policy",
   description: "PromptTray privacy policy and data handling information.",
 };
 

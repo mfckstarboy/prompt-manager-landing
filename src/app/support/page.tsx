@@ -4,7 +4,7 @@ import { LegalSection, LegalShell } from "@/components/legal/legal-shell";
 import { CHROME_WEB_STORE_URL } from "@/lib/chrome-web-store";
 
 export const metadata: Metadata = {
-  title: "Help | PromptTray",
+  title: "Help",
   description: "PromptTray help, setup guidance, and contact information.",
 };
 

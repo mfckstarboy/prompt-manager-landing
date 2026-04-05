@@ -7,6 +7,7 @@ import { Chrome, Menu, X } from "lucide-react";
 import { Reveal } from "@/components/landing/landing-motion";
 import { PromptTrayLogo } from "@/components/landing/prompttray-logo";
 import { Button } from "@/components/ui/button";
+import { CHROME_WEB_STORE_URL } from "@/lib/chrome-web-store";
 
 const navLinkClassName =
   "landing-nav relative text-muted-foreground transition-[color,opacity] duration-200 hover:text-foreground after:absolute after:-bottom-1 after:left-0 after:h-px after:w-full after:origin-left after:scale-x-0 after:bg-current after:opacity-60 after:transition-transform after:duration-200 after:content-[''] hover:after:scale-x-100";
@@ -38,9 +39,11 @@ export function Header() {
             <Button asChild variant="ghost" size="sm" className="landing-ui">
               <Link href="/login">Sign in</Link>
             </Button>
-            <Button size="sm" className="landing-ui gap-2">
-              <Chrome className="h-4 w-4" />
-              Add to Chrome
+            <Button asChild size="sm" className="landing-ui gap-2">
+              <a href={CHROME_WEB_STORE_URL} target="_blank" rel="noreferrer">
+                <Chrome className="h-4 w-4" />
+                Add to Chrome
+              </a>
             </Button>
           </div>
 
@@ -78,9 +81,11 @@ export function Header() {
             <Button asChild variant="ghost" size="sm" className="landing-ui justify-start">
               <Link href="/login">Sign in</Link>
             </Button>
-            <Button size="sm" className="landing-ui gap-2">
-              <Chrome className="h-4 w-4" />
-              Add to Chrome
+            <Button asChild size="sm" className="landing-ui gap-2">
+              <a href={CHROME_WEB_STORE_URL} target="_blank" rel="noreferrer">
+                <Chrome className="h-4 w-4" />
+                Add to Chrome
+              </a>
             </Button>
           </nav>
         </div>

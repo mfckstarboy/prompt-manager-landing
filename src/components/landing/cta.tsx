@@ -3,6 +3,7 @@ import { Check, Chrome } from "lucide-react";
 import { ConstellationBackground } from "@/components/landing/constellation-background";
 import { Reveal, RevealGroup, RevealItem } from "@/components/landing/landing-motion";
 import { Button } from "@/components/ui/button";
+import { CHROME_WEB_STORE_URL } from "@/lib/chrome-web-store";
 
 const benefits = ["Free to start", "No credit card required", "Works with all AI tools"];
 
@@ -21,9 +22,11 @@ export function CTA() {
           Join thousands of people who stopped rewriting prompts and started working smarter.
         </p>
 
-        <Button size="lg" className="landing-ui h-14 gap-2 px-8">
-          <Chrome className="h-5 w-5" />
-          Add to Chrome - Free
+        <Button asChild size="lg" className="landing-ui h-14 gap-2 px-8">
+          <a href={CHROME_WEB_STORE_URL} target="_blank" rel="noreferrer">
+            <Chrome className="h-5 w-5" />
+            Add to Chrome - Free
+          </a>
         </Button>
 
         <RevealGroup

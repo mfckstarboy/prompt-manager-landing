@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { LegalSection, LegalShell } from "@/components/legal/legal-shell";
+import { CHROME_WEB_STORE_URL } from "@/lib/chrome-web-store";
 
 export const metadata: Metadata = {
   title: "Help | PromptTray",
@@ -32,10 +33,18 @@ export default function SupportPage() {
           <div>
             <p className="font-medium text-foreground">How do I install PromptTray?</p>
             <p className="mt-2">
-              Install the extension, open ChatGPT, and sign in when PromptTray asks you to connect
-              your account. You can start sign up or login from the extension sidebar or from the
-              PromptTray website, and PromptTray appears inside ChatGPT and syncs your saved
-              prompts with your account.
+              Install the extension from the{" "}
+              <a
+                href={CHROME_WEB_STORE_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="font-medium text-foreground transition-colors duration-200 hover:text-primary"
+              >
+                Chrome Web Store
+              </a>
+              , open ChatGPT, and sign in when PromptTray asks you to connect your account. You
+              can start sign up or login from the extension sidebar or from the PromptTray website,
+              and PromptTray appears inside ChatGPT and syncs your saved prompts with your account.
             </p>
           </div>
           <div>

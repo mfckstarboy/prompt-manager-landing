@@ -12,6 +12,7 @@ import {
 
 import { PromptTrayLogo } from "@/components/landing/prompttray-logo";
 import { Button } from "@/components/ui/button";
+import { CHROME_WEB_STORE_URL } from "@/lib/chrome-web-store";
 import { createClient } from "@/lib/supabase/server";
 
 import { LogoutButton } from "./logout-button";
@@ -172,7 +173,9 @@ export default async function AppPage() {
                 </Button>
                 {!extensionConnected ? (
                   <Button asChild variant="outline" className="landing-ui h-12 px-6">
-                    <a href="#extension-setup">Install Extension</a>
+                    <a href={CHROME_WEB_STORE_URL} target="_blank" rel="noreferrer">
+                      Install Extension
+                    </a>
                   </Button>
                 ) : (
                   <Button asChild variant="outline" className="landing-ui h-12 px-6">
@@ -301,7 +304,9 @@ export default async function AppPage() {
                         </a>
                       </Button>
                       <Button asChild variant="outline" className="landing-ui h-11 px-5">
-                        <a href="#extension-setup">Install Extension</a>
+                        <a href={CHROME_WEB_STORE_URL} target="_blank" rel="noreferrer">
+                          Install Extension
+                        </a>
                       </Button>
                     </div>
                   </div>
@@ -443,8 +448,8 @@ export default async function AppPage() {
                       Install extension
                     </h2>
                     <p className="landing-body mt-2 text-muted-foreground">
-                      PromptTray runs inside ChatGPT. Install the Chrome extension to save new
-                      prompts and have them appear in your account overview.
+                      PromptTray runs inside ChatGPT. Install it from the Chrome Web Store to save
+                      new prompts and have them appear in your account overview.
                     </p>
                   </div>
                   <div className="rounded-full bg-accent p-3 text-primary">
@@ -454,13 +459,22 @@ export default async function AppPage() {
 
                 <ol className="landing-body mt-6 grid gap-3 text-muted-foreground">
                   <li className="rounded-2xl border border-border bg-background px-4 py-3">
-                    Open <span className="font-medium text-foreground">chrome://extensions</span>.
+                    Open the{" "}
+                    <a
+                      href={CHROME_WEB_STORE_URL}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="font-medium text-foreground underline underline-offset-4 transition-colors duration-200 hover:text-primary"
+                    >
+                      Chrome Web Store listing
+                    </a>
+                    .
                   </li>
                   <li className="rounded-2xl border border-border bg-background px-4 py-3">
-                    Enable <span className="font-medium text-foreground">Developer mode</span>.
+                    Click <span className="font-medium text-foreground">Add to Chrome</span>.
                   </li>
                   <li className="rounded-2xl border border-border bg-background px-4 py-3">
-                    Load the PromptTray extension and open ChatGPT to start saving prompts.
+                    Open ChatGPT and use PromptTray to start saving prompts.
                   </li>
                 </ol>
               </section>

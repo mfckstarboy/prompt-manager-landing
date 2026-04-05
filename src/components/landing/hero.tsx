@@ -3,6 +3,7 @@ import { ArrowRight, Chrome, Search, Settings, Sparkles, X } from "lucide-react"
 import { Reveal } from "@/components/landing/landing-motion";
 import { PromptTrayLogo } from "@/components/landing/prompttray-logo";
 import { Button } from "@/components/ui/button";
+import { CHROME_WEB_STORE_URL } from "@/lib/chrome-web-store";
 
 const promptList = [
   {
@@ -62,9 +63,11 @@ export function Hero() {
           </p>
 
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Button size="lg" className="landing-ui h-12 gap-2 px-6">
-              <Chrome className="h-5 w-5" />
-              Add to Chrome - Free
+            <Button asChild size="lg" className="landing-ui h-12 gap-2 px-6">
+              <a href={CHROME_WEB_STORE_URL} target="_blank" rel="noreferrer">
+                <Chrome className="h-5 w-5" />
+                Add to Chrome - Free
+              </a>
             </Button>
             <Button asChild variant="ghost" size="lg" className="landing-ui h-12 gap-2 px-6">
               <a href="#how-it-works">

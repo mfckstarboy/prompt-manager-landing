@@ -16,11 +16,11 @@ export const metadata: Metadata = {
   description: seoDescription,
   metadataBase: siteUrl,
   alternates: {
-    canonical: "/",
+    canonical: "./",
   },
   openGraph: {
     type: "website",
-    url: "/",
+    url: siteUrl.toString(),
     siteName: "PromptTray",
     title: seoTitle,
     description: seoDescription,

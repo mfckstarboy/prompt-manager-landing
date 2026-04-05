@@ -1,4 +1,4 @@
-const DEFAULT_SITE_URL = "https://prompttray.app";
+const DEFAULT_SITE_URL = "https://www.prompttray.app";
 
 function normalizeSiteUrl(value?: string | null) {
   if (!value) {
@@ -18,7 +18,13 @@ function normalizeSiteUrl(value?: string | null) {
 }
 
 export function getSiteUrl() {
-  return normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL) ?? DEFAULT_SITE_URL;
+  const siteUrl = normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL) ?? DEFAULT_SITE_URL;
+
+  if (siteUrl === "https://prompttray.app") {
+    return DEFAULT_SITE_URL;
+  }
+
+  return siteUrl;
 }
 
 export function getMetadataBase() {

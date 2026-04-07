@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { permanentRedirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function DashboardRoute() {
-  redirect("/app");
+  permanentRedirect("/app");
 }

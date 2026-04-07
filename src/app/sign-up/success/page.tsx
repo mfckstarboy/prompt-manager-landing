@@ -25,7 +25,7 @@ export default function SignUpSuccessPage() {
         </div>
 
         <Button asChild className="landing-ui h-12 w-full">
-          <Link href="/dashboard">Go to dashboard</Link>
+          <Link href="/app">Go to dashboard</Link>
         </Button>
       </div>
     </AuthShell>

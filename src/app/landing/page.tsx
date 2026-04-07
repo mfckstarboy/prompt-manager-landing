@@ -1,5 +1,5 @@
-import PromptTrayLanding from "@/components/landing/prompttray-landing";
+import { permanentRedirect } from "next/navigation";
 
 export default function LandingPage() {
-  return <PromptTrayLanding />;
+  permanentRedirect("/");
 }

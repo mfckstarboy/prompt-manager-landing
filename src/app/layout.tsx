@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { getMetadataBase } from "@/lib/site-url";
 
@@ -6,7 +7,8 @@ const siteUrl = getMetadataBase();
 const seoTitle = "AI Prompt Manager for ChatGPT | PromptTray";
 const seoDescription =
   "Save, organize, and reuse AI prompts in ChatGPT with PromptTray, a Chrome extension that keeps your best prompts ready whenever you need them.";
-const ogImage = "/android-chrome-512x512.png";
+// TODO: Create /public/og-image.png at 1200×630px for proper social sharing previews
+const ogImage = "/og-image.png";
 
 export const metadata: Metadata = {
   title: {
@@ -15,9 +17,6 @@ export const metadata: Metadata = {
   },
   description: seoDescription,
   metadataBase: siteUrl,
-  alternates: {
-    canonical: "./",
-  },
   openGraph: {
     type: "website",
     url: siteUrl.toString(),
@@ -27,14 +26,14 @@ export const metadata: Metadata = {
     images: [
       {
         url: ogImage,
-        width: 512,
-        height: 512,
-        alt: "PromptTray",
+        width: 1200,
+        height: 630,
+        alt: "PromptTray — AI Prompt Manager for ChatGPT",
       },
     ],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: seoTitle,
     description: seoDescription,
     images: [ogImage],
@@ -78,6 +77,7 @@ export default function RootLayout({
           }}
         />
         {children}
+        <Analytics />
       </body>
     </html>
   );

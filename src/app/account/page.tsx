@@ -13,6 +13,7 @@ import { LogoutButton } from "../app/logout-button";
 export const metadata: Metadata = {
   title: "Manage Account",
   description: "Manage your PromptTray account and connection details.",
+  robots: { index: false, follow: false },
 };
 
 export default async function AccountRoute() {

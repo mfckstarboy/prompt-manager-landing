@@ -5,7 +5,7 @@ import { Reveal, RevealGroup, RevealItem } from "@/components/landing/landing-mo
 import { Button } from "@/components/ui/button";
 import { CHROME_WEB_STORE_URL } from "@/lib/chrome-web-store";
 
-const benefits = ["Free to start", "No credit card required", "Works with all AI tools"];
+const benefits = ["Free to start", "No credit card required", "Works inside ChatGPT"];
 
 export function CTA() {
   return (
@@ -19,7 +19,7 @@ export function CTA() {
           Your prompts. Always ready.
         </h2>
         <p className="landing-body mx-auto mb-8 max-w-xl opacity-80 md:max-w-2xl">
-          Join thousands of people who stopped rewriting prompts and started working smarter.
+          Used by designers, developers, and marketers who finally stopped rewriting the same prompts over and over.
         </p>
 
         <Button asChild size="lg" className="landing-ui h-14 gap-2 px-8">

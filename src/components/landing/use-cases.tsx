@@ -7,6 +7,7 @@ const useCases = [
     icon: Palette,
     role: "Designers",
     quote: "I keep all my AI workflows in one place instead of rewriting prompts every time.",
+    attribution: "— UX Designer",
     prompts: [
       "Reusing the same prompts across multiple design iterations (Midjourney, UI ideas, moodboards)",
       "Quickly testing variations without rebuilding prompts from scratch",
@@ -17,6 +18,7 @@ const useCases = [
     icon: Code,
     role: "Developers",
     quote: "I don’t waste time rewriting the same prompts for debugging and code tasks.",
+    attribution: "— Software Developer",
     prompts: [
       "Reusing prompts for debugging, code review, and documentation",
       "Switching between projects without losing context",
@@ -27,6 +29,7 @@ const useCases = [
     icon: Megaphone,
     role: "Marketers",
     quote: "My entire content workflow runs faster because I reuse what already works.",
+    attribution: "— Marketing Manager",
     prompts: [
       "Reusing high-performing prompts for ads, emails, and social content",
       "Scaling content production without rewriting briefs",
@@ -57,8 +60,11 @@ export function UseCases() {
                   <span className="landing-h4">{useCase.role}</span>
                 </div>
 
-                <p className="landing-body mb-6 text-muted-foreground">
+                <p className="landing-body text-muted-foreground">
                   &ldquo;{useCase.quote}&rdquo;
+                </p>
+                <p className="landing-small mb-6 mt-2 text-muted-foreground/60">
+                  {useCase.attribution}
                 </p>
 
                 <div className="space-y-2">

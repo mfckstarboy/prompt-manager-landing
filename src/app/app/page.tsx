@@ -43,6 +43,15 @@ type PromptQueryRow = {
   title: string;
 };
 
+type EntitlementRow = {
+  current_period_end: string | null;
+  plan: string;
+  status: string;
+};
+
+const FREE_PROMPT_LIMIT = 30;
+const FREE_CATEGORY_LIMIT = 5;
+
 function formatRelativeTime(value: string) {
   const date = new Date(value);
 
@@ -80,6 +89,15 @@ function StatusDot({ active }: { active: boolean }) {
   );
 }
 
+function getDashboardPlan(entitlement: EntitlementRow | null) {
+  const isPremium =
+    entitlement?.plan === "premium" &&
+    entitlement?.status === "active" &&
+    (!entitlement.current_period_end || new Date(entitlement.current_period_end) > new Date());
+
+  return isPremium ? "premium" : "free";
+}
+
 export default async function AppPage() {
   const supabase = await createClient();
   const {
@@ -90,8 +108,11 @@ export default async function AppPage() {
     redirect("/login");
   }
 
-  const [{ data: categories, error: categoriesError }, { data: prompts, error: promptsError }] =
-    await Promise.all([
+  const [
+    { data: categories, error: categoriesError },
+    { data: prompts, error: promptsError },
+    { data: entitlement, error: entitlementError },
+  ] = await Promise.all([
       supabase
         .from("categories")
         .select("id, name")
@@ -104,6 +125,11 @@ export default async function AppPage() {
         )
         .eq("user_id", user.id)
         .order("created_at", { ascending: false }),
+      supabase
+        .from("user_entitlements")
+        .select("plan, status, current_period_end")
+        .eq("user_id", user.id)
+        .maybeSingle(),
     ]);
 
   if (categoriesError) {
@@ -114,6 +140,10 @@ export default async function AppPage() {
     throw new Error(promptsError.message);
   }
 
+  if (entitlementError) {
+    throw new Error(entitlementError.message);
+  }
+
   const safeCategories = (categories ?? []) as CategoryRow[];
   const safePrompts = ((prompts ?? []) as PromptQueryRow[]).map((prompt) => ({
     ...prompt,
@@ -122,6 +152,15 @@ export default async function AppPage() {
   const hasPrompts = safePrompts.length > 0;
   const totalPrompts = safePrompts.length;
   const totalCategories = safeCategories.length;
+  const plan = getDashboardPlan((entitlement ?? null) as EntitlementRow | null);
+  const isPremium = plan === "premium";
+  const planLabel = isPremium ? "Premium" : "Free";
+  const promptUsageLabel = isPremium
+    ? `${totalPrompts} / Unlimited`
+    : `${totalPrompts} / ${FREE_PROMPT_LIMIT}`;
+  const categoryUsageLabel = isPremium
+    ? `${totalCategories} / Unlimited`
+    : `${totalCategories} / ${FREE_CATEGORY_LIMIT}`;
   const recentPrompt = safePrompts[0] ?? null;
   const extensionConnected = hasPrompts;
   const extensionInstalled = hasPrompts;
@@ -164,8 +203,8 @@ export default async function AppPage() {
                   {user.email ?? "your account"}.
                 </p>
                 <p className="landing-small mt-3 text-muted-foreground">
-                  Use this dashboard for your account, sync status, and overview while ChatGPT
-                  stays your main workspace for prompts.
+                  Your account is on the {planLabel} plan. Use this dashboard for sync status and
+                  usage while ChatGPT stays your main workspace for prompts.
                 </p>
               </div>
 
@@ -246,8 +285,8 @@ export default async function AppPage() {
                   </div>
 
                   <div className="rounded-2xl border border-border bg-background px-4 py-4">
-                    <p className="landing-label text-muted-foreground">Browser</p>
-                    <p className="landing-h4 mt-1">Chrome</p>
+                    <p className="landing-label text-muted-foreground">Plan</p>
+                    <p className="landing-h4 mt-1">{planLabel}</p>
                   </div>
                 </div>
               </section>
@@ -273,16 +312,16 @@ export default async function AppPage() {
 
                 <div className="mt-6 grid gap-4 md:grid-cols-[0.9fr_0.9fr_1.25fr]">
                   <div className="rounded-2xl border border-border bg-background px-4 py-5">
-                    <p className="landing-label text-muted-foreground">Total prompts</p>
+                    <p className="landing-label text-muted-foreground">Prompt usage</p>
                     <p className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-foreground">
-                      {totalPrompts}
+                      {promptUsageLabel}
                     </p>
                   </div>
 
                   <div className="rounded-2xl border border-border bg-background px-4 py-5">
-                    <p className="landing-label text-muted-foreground">Categories</p>
+                    <p className="landing-label text-muted-foreground">Category usage</p>
                     <p className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-foreground">
-                      {totalCategories}
+                      {categoryUsageLabel}
                     </p>
                   </div>
 

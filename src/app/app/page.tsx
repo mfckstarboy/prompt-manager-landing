@@ -12,11 +12,13 @@ import {
   LayoutGrid,
   LifeBuoy,
   Puzzle,
+  Sparkles,
   UserRound,
 } from "lucide-react";
 
 import { PromptTrayLogo } from "@/components/landing/prompttray-logo";
 import { Button } from "@/components/ui/button";
+import { getUpgradeCheckoutUrl } from "@/lib/billing";
 import { CHROME_WEB_STORE_URL } from "@/lib/chrome-web-store";
 import { createClient } from "@/lib/supabase/server";
 
@@ -57,6 +59,8 @@ type EntitlementRow = {
 
 const FREE_PROMPT_LIMIT = 30;
 const FREE_CATEGORY_LIMIT = 5;
+const FREE_PROMPT_NEAR_LIMIT = 24;
+const FREE_CATEGORY_NEAR_LIMIT = 4;
 
 function formatRelativeTime(value: string) {
   const date = new Date(value);
@@ -102,6 +106,50 @@ function getDashboardPlan(entitlement: EntitlementRow | null) {
     (!entitlement.current_period_end || new Date(entitlement.current_period_end) > new Date());
 
   return isPremium ? "premium" : "free";
+}
+
+function getDashboardPaywallState({
+  categoryCount,
+  isPremium,
+  promptCount,
+}: {
+  categoryCount: number;
+  isPremium: boolean;
+  promptCount: number;
+}) {
+  if (isPremium) {
+    return {
+      body: "Unlimited prompts and categories are active on this account.",
+      headline: "Premium plan",
+      severity: "premium" as const,
+    };
+  }
+
+  const atLimit = promptCount >= FREE_PROMPT_LIMIT || categoryCount >= FREE_CATEGORY_LIMIT;
+  const nearLimit =
+    promptCount >= FREE_PROMPT_NEAR_LIMIT || categoryCount >= FREE_CATEGORY_NEAR_LIMIT;
+
+  if (atLimit) {
+    return {
+      body: "Upgrade to Premium for unlimited prompts and categories.",
+      headline: "Free limit reached",
+      severity: "limit" as const,
+    };
+  }
+
+  if (nearLimit) {
+    return {
+      body: "Upgrade before your prompt workflow hits the Free plan cap.",
+      headline: "You're close to the Free limit",
+      severity: "near" as const,
+    };
+  }
+
+  return {
+    body: "Premium unlocks unlimited prompts and categories when your library grows.",
+    headline: "Free plan",
+    severity: "normal" as const,
+  };
 }
 
 function renderPromptAvatar(prompt: PromptRow) {
@@ -180,6 +228,12 @@ export default async function AppPage() {
   const totalCategories = safeCategories.length;
   const plan = getDashboardPlan((entitlement ?? null) as EntitlementRow | null);
   const isPremium = plan === "premium";
+  const upgradeCheckoutUrl = getUpgradeCheckoutUrl();
+  const paywallState = getDashboardPaywallState({
+    categoryCount: totalCategories,
+    isPremium,
+    promptCount: totalPrompts,
+  });
   const planLabel = isPremium ? "Premium" : "Free";
   const promptUsageLabel = isPremium
     ? `${totalPrompts} / Unlimited`
@@ -313,6 +367,69 @@ export default async function AppPage() {
                   <div className="rounded-2xl border border-border bg-background px-4 py-4">
                     <p className="landing-label text-muted-foreground">Plan</p>
                     <p className="landing-h4 mt-1">{planLabel}</p>
+                    <p className="landing-small mt-1 text-muted-foreground">
+                      {isPremium ? "Unlimited library" : "Free limits active"}
+                    </p>
+                  </div>
+                </div>
+              </section>
+
+              <section
+                id="plan-usage"
+                className={`rounded-[28px] border p-6 shadow-[0_20px_50px_-42px_rgba(15,23,42,0.2)] ${
+                  paywallState.severity === "premium"
+                    ? "border-emerald-200 bg-emerald-50/80"
+                    : paywallState.severity === "near" || paywallState.severity === "limit"
+                      ? "border-amber-200 bg-amber-50/85"
+                      : "border-border/80 bg-card"
+                }`}
+              >
+                <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <div className="rounded-full bg-background/80 p-2 text-primary">
+                        <Sparkles className="h-4 w-4" />
+                      </div>
+                      <p className="landing-label text-muted-foreground">Plan & usage</p>
+                    </div>
+                    <h2
+                      className="mt-4 text-[30px] leading-[34px] tracking-[-0.01em] text-foreground"
+                      style={{ fontFamily: "Instrument Serif, serif", fontWeight: 400 }}
+                    >
+                      {paywallState.headline}
+                    </h2>
+                    <p className="landing-body mt-2 max-w-xl text-muted-foreground">
+                      {paywallState.body}
+                    </p>
+                  </div>
+
+                  {!isPremium ? (
+                    <Button asChild className="landing-ui h-11 shrink-0 gap-2 px-5">
+                      <a href={upgradeCheckoutUrl} target="_blank" rel="noreferrer">
+                        Upgrade
+                        <ArrowUpRight className="h-4 w-4" />
+                      </a>
+                    </Button>
+                  ) : (
+                    <span className="landing-label rounded-full bg-emerald-100 px-3 py-2 text-emerald-700">
+                      Premium active
+                    </span>
+                  )}
+                </div>
+
+                <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                  <div className="rounded-2xl border border-border/70 bg-background/80 px-4 py-5">
+                    <p className="landing-label text-muted-foreground">Prompt usage</p>
+                    <p className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-foreground">
+                      {promptUsageLabel}
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl border border-border/70 bg-background/80 px-4 py-5">
+                    <p className="landing-label text-muted-foreground">Category usage</p>
+                    <p className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-foreground">
+                      {categoryUsageLabel}
+                    </p>
                   </div>
                 </div>
               </section>
@@ -336,32 +453,16 @@ export default async function AppPage() {
                   </div>
                 </div>
 
-                <div className="mt-6 grid gap-4 md:grid-cols-[0.9fr_0.9fr_1.25fr]">
-                  <div className="rounded-2xl border border-border bg-background px-4 py-5">
-                    <p className="landing-label text-muted-foreground">Prompt usage</p>
-                    <p className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-foreground">
-                      {promptUsageLabel}
-                    </p>
-                  </div>
-
-                  <div className="rounded-2xl border border-border bg-background px-4 py-5">
-                    <p className="landing-label text-muted-foreground">Category usage</p>
-                    <p className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-foreground">
-                      {categoryUsageLabel}
-                    </p>
-                  </div>
-
-                  <div className="rounded-2xl border border-border bg-secondary/60 px-4 py-5">
-                    <p className="landing-label text-muted-foreground">Most recent</p>
-                    {recentPrompt ? (
-                      <div className="mt-3 flex items-start gap-3">
-                        {renderPromptAvatar(recentPrompt)}
-                        <p className="landing-body min-w-0 text-foreground">{recentPrompt.title}</p>
-                      </div>
-                    ) : (
-                      <p className="landing-body mt-3 text-foreground">No prompts saved yet</p>
-                    )}
-                  </div>
+                <div className="mt-6 rounded-2xl border border-border bg-secondary/60 px-4 py-5">
+                  <p className="landing-label text-muted-foreground">Most recent</p>
+                  {recentPrompt ? (
+                    <div className="mt-3 flex items-start gap-3">
+                      {renderPromptAvatar(recentPrompt)}
+                      <p className="landing-body min-w-0 text-foreground">{recentPrompt.title}</p>
+                    </div>
+                  ) : (
+                    <p className="landing-body mt-3 text-foreground">No prompts saved yet</p>
+                  )}
                 </div>
 
                 {!hasPrompts ? (

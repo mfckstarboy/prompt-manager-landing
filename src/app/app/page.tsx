@@ -28,6 +28,9 @@ type CategoryRow = {
 };
 
 type PromptRow = {
+  avatar_emoji: string | null;
+  avatar_image_path: string | null;
+  avatar_type: string | null;
   category: CategoryRow | null;
   content: string;
   created_at: string;
@@ -36,6 +39,9 @@ type PromptRow = {
 };
 
 type PromptQueryRow = {
+  avatar_emoji: string | null;
+  avatar_image_path: string | null;
+  avatar_type: string | null;
   category: CategoryRow[] | null;
   content: string;
   created_at: string;
@@ -98,6 +104,26 @@ function getDashboardPlan(entitlement: EntitlementRow | null) {
   return isPremium ? "premium" : "free";
 }
 
+function renderPromptAvatar(prompt: PromptRow) {
+  if (prompt.avatar_type === "emoji" && prompt.avatar_emoji) {
+    return (
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-border/80 bg-muted text-base">
+        {prompt.avatar_emoji}
+      </span>
+    );
+  }
+
+  if (prompt.avatar_type === "image" && prompt.avatar_image_path) {
+    return (
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-border/80 bg-muted text-[10px] font-medium text-muted-foreground">
+        IMG
+      </span>
+    );
+  }
+
+  return null;
+}
+
 export default async function AppPage() {
   const supabase = await createClient();
   const {
@@ -121,7 +147,7 @@ export default async function AppPage() {
       supabase
         .from("prompts")
         .select(
-          "id, title, content, created_at, category:categories!prompts_category_id_fkey(id, name)"
+          "id, title, content, created_at, avatar_type, avatar_emoji, avatar_image_path, category:categories!prompts_category_id_fkey(id, name)"
         )
         .eq("user_id", user.id)
         .order("created_at", { ascending: false }),
@@ -327,9 +353,14 @@ export default async function AppPage() {
 
                   <div className="rounded-2xl border border-border bg-secondary/60 px-4 py-5">
                     <p className="landing-label text-muted-foreground">Most recent</p>
-                    <p className="landing-body mt-3 text-foreground">
-                      {recentPrompt ? recentPrompt.title : "No prompts saved yet"}
-                    </p>
+                    {recentPrompt ? (
+                      <div className="mt-3 flex items-start gap-3">
+                        {renderPromptAvatar(recentPrompt)}
+                        <p className="landing-body min-w-0 text-foreground">{recentPrompt.title}</p>
+                      </div>
+                    ) : (
+                      <p className="landing-body mt-3 text-foreground">No prompts saved yet</p>
+                    )}
                   </div>
                 </div>
 
@@ -358,15 +389,18 @@ export default async function AppPage() {
                   <div className="mt-6 rounded-2xl border border-border bg-background px-5 py-5">
                     <p className="landing-label text-muted-foreground">Latest sync preview</p>
                     <div className="mt-3 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                      <div className="min-w-0">
-                        <h3 className="landing-h4 text-base text-foreground">{recentPrompt?.title}</h3>
-                        <p className="landing-body mt-2 max-w-2xl text-muted-foreground">
-                          {recentPrompt
-                            ? recentPrompt.content.length > 160
-                              ? `${recentPrompt.content.slice(0, 160)}...`
-                              : recentPrompt.content
-                            : "No prompts saved yet"}
-                        </p>
+                      <div className="flex min-w-0 items-start gap-3">
+                        {recentPrompt ? renderPromptAvatar(recentPrompt) : null}
+                        <div className="min-w-0">
+                          <h3 className="landing-h4 text-base text-foreground">{recentPrompt?.title}</h3>
+                          <p className="landing-body mt-2 max-w-2xl text-muted-foreground">
+                            {recentPrompt
+                              ? recentPrompt.content.length > 160
+                                ? `${recentPrompt.content.slice(0, 160)}...`
+                                : recentPrompt.content
+                              : "No prompts saved yet"}
+                          </p>
+                        </div>
                       </div>
 
                       <div className="flex flex-col items-start gap-2 md:items-end">

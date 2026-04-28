@@ -30,12 +30,92 @@ create table if not exists public.prompts (
   title text not null,
   content text not null,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  avatar_type text null,
+  avatar_emoji text null,
+  avatar_image_path text null,
+  constraint prompts_avatar_type_check check (
+    avatar_type is null
+    or avatar_type in ('emoji', 'image')
+  ),
+  constraint prompts_avatar_emoji_check check (
+    avatar_type <> 'emoji'
+    or nullif(trim(coalesce(avatar_emoji, '')), '') is not null
+  ),
+  constraint prompts_avatar_image_path_check check (
+    avatar_type <> 'image'
+    or nullif(trim(coalesce(avatar_image_path, '')), '') is not null
+  )
 );
+
+alter table public.prompts
+add column if not exists avatar_type text null;
+
+alter table public.prompts
+add column if not exists avatar_emoji text null;
+
+alter table public.prompts
+add column if not exists avatar_image_path text null;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'prompts_avatar_type_check'
+      and conrelid = 'public.prompts'::regclass
+  ) then
+    alter table public.prompts
+    add constraint prompts_avatar_type_check check (
+      avatar_type is null
+      or avatar_type in ('emoji', 'image')
+    );
+  end if;
+
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'prompts_avatar_emoji_check'
+      and conrelid = 'public.prompts'::regclass
+  ) then
+    alter table public.prompts
+    add constraint prompts_avatar_emoji_check check (
+      avatar_type <> 'emoji'
+      or nullif(trim(coalesce(avatar_emoji, '')), '') is not null
+    );
+  end if;
+
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'prompts_avatar_image_path_check'
+      and conrelid = 'public.prompts'::regclass
+  ) then
+    alter table public.prompts
+    add constraint prompts_avatar_image_path_check check (
+      avatar_type <> 'image'
+      or nullif(trim(coalesce(avatar_image_path, '')), '') is not null
+    );
+  end if;
+end $$;
 
 alter table public.user_entitlements enable row level security;
 alter table public.categories enable row level security;
 alter table public.prompts enable row level security;
+
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'prompt-avatars',
+  'prompt-avatars',
+  false,
+  262144,
+  array['image/webp', 'image/jpeg']
+)
+on conflict (id) do update
+set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
 
 drop policy if exists "user_entitlements_select_own" on public.user_entitlements;
 
@@ -104,6 +184,51 @@ on public.prompts
 for delete
 to authenticated
 using (auth.uid() = user_id);
+
+drop policy if exists "prompt_avatar_objects_select_own" on storage.objects;
+drop policy if exists "prompt_avatar_objects_insert_own" on storage.objects;
+drop policy if exists "prompt_avatar_objects_update_own" on storage.objects;
+drop policy if exists "prompt_avatar_objects_delete_own" on storage.objects;
+
+create policy "prompt_avatar_objects_select_own"
+on storage.objects
+for select
+to authenticated
+using (
+  bucket_id = 'prompt-avatars'
+  and split_part(name, '/', 1) = auth.uid()::text
+);
+
+create policy "prompt_avatar_objects_insert_own"
+on storage.objects
+for insert
+to authenticated
+with check (
+  bucket_id = 'prompt-avatars'
+  and split_part(name, '/', 1) = auth.uid()::text
+);
+
+create policy "prompt_avatar_objects_update_own"
+on storage.objects
+for update
+to authenticated
+using (
+  bucket_id = 'prompt-avatars'
+  and split_part(name, '/', 1) = auth.uid()::text
+)
+with check (
+  bucket_id = 'prompt-avatars'
+  and split_part(name, '/', 1) = auth.uid()::text
+);
+
+create policy "prompt_avatar_objects_delete_own"
+on storage.objects
+for delete
+to authenticated
+using (
+  bucket_id = 'prompt-avatars'
+  and split_part(name, '/', 1) = auth.uid()::text
+);
 
 create index if not exists categories_user_id_idx on public.categories(user_id);
 create index if not exists prompts_user_id_idx on public.prompts(user_id);

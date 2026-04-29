@@ -165,7 +165,8 @@ begin
       using errcode = 'P0001';
   end if;
 
-  if current_prompt.content is distinct from selected_version.content then
+  if current_prompt.content is distinct from selected_version.content
+    or current_prompt.title is distinct from selected_version.title then
     perform public.create_prompt_version(
       current_prompt.id,
       current_prompt.title,
@@ -206,3 +207,11 @@ begin
   return deleted_count;
 end;
 $$;
+
+revoke execute on function public.prune_prompt_versions(uuid, uuid) from public, anon, authenticated;
+revoke execute on function public.create_prompt_version(uuid, text, text, text) from public, anon, authenticated;
+revoke execute on function public.restore_prompt_version(uuid) from public, anon, authenticated;
+revoke execute on function public.delete_inactive_prompt_versions_older_than_90_days() from public, anon, authenticated;
+
+grant execute on function public.create_prompt_version(uuid, text, text, text) to authenticated;
+grant execute on function public.restore_prompt_version(uuid) to authenticated;

@@ -6,6 +6,7 @@ import { CHROME_WEB_STORE_URL } from "@/lib/chrome-web-store";
 export const metadata: Metadata = {
   title: "Help",
   description: "PromptTray help, setup guidance, and contact information.",
+  alternates: { canonical: "https://www.prompttray.app/support" },
 };
 
 export default function SupportPage() {

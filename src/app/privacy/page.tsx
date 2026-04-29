@@ -5,6 +5,7 @@ import { LegalSection, LegalShell } from "@/components/legal/legal-shell";
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description: "PromptTray privacy policy and data handling information.",
+  alternates: { canonical: "https://www.prompttray.app/privacy" },
 };
 
 export default function PrivacyPage() {

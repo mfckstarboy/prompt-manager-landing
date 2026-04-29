@@ -5,6 +5,7 @@ import { LegalSection, LegalShell } from "@/components/legal/legal-shell";
 export const metadata: Metadata = {
   title: "Terms of Service",
   description: "PromptTray terms of service.",
+  alternates: { canonical: "https://www.prompttray.app/terms" },
 };
 
 export default function TermsPage() {

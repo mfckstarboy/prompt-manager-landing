@@ -18,7 +18,6 @@ import {
 
 import { PromptTrayLogo } from "@/components/landing/prompttray-logo";
 import { Button } from "@/components/ui/button";
-import { getUpgradeCheckoutUrl } from "@/lib/billing";
 import { CHROME_WEB_STORE_URL } from "@/lib/chrome-web-store";
 import { createClient } from "@/lib/supabase/server";
 
@@ -228,7 +227,6 @@ export default async function AppPage() {
   const totalCategories = safeCategories.length;
   const plan = getDashboardPlan((entitlement ?? null) as EntitlementRow | null);
   const isPremium = plan === "premium";
-  const upgradeCheckoutUrl = getUpgradeCheckoutUrl();
   const paywallState = getDashboardPaywallState({
     categoryCount: totalCategories,
     isPremium,
@@ -405,10 +403,10 @@ export default async function AppPage() {
 
                   {!isPremium ? (
                     <Button asChild className="landing-ui h-11 shrink-0 gap-2 px-5">
-                      <a href={upgradeCheckoutUrl} target="_blank" rel="noreferrer">
+                      <Link href="/pricing">
                         Upgrade
                         <ArrowUpRight className="h-4 w-4" />
-                      </a>
+                      </Link>
                     </Button>
                   ) : (
                     <span className="landing-label rounded-full bg-emerald-100 px-3 py-2 text-emerald-700">

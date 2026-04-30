@@ -1,23 +1,25 @@
-import { getSiteUrl } from "@/lib/site-url";
+import crypto from "crypto";
 
-function normalizeHttpsUrl(value?: string | null) {
-  const trimmed = value?.trim();
-
-  if (!trimmed) {
-    return null;
-  }
-
-  try {
-    const url = new URL(trimmed);
-    return url.protocol === "https:" ? url.toString() : null;
-  } catch {
-    return null;
-  }
+export function createDodoCheckoutUrl(params: {
+  userId: string;
+  productId: string;
+  redirectUrl: string;
+}): string {
+  const url = new URL("https://checkout.dodopayments.com/buy/" + params.productId);
+  url.searchParams.set("metadata[userId]", params.userId);
+  url.searchParams.set("metadata[plan]", "premium");
+  url.searchParams.set("redirect_url", params.redirectUrl);
+  return url.toString();
 }
 
-export function getUpgradeCheckoutUrl() {
-  return (
-    normalizeHttpsUrl(process.env.NEXT_PUBLIC_UPGRADE_CHECKOUT_URL) ??
-    `${getSiteUrl()}/support`
-  );
+export function verifyDodoWebhookSignature(params: {
+  rawBody: string;
+  signature: string;
+  secret: string;
+}): boolean {
+  const expected = crypto
+    .createHmac("sha256", params.secret)
+    .update(params.rawBody, "utf8")
+    .digest("hex");
+  return crypto.timingSafeEqual(Buffer.from(expected, "hex"), Buffer.from(params.signature, "hex"));
 }

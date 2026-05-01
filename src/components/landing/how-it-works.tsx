@@ -9,7 +9,7 @@ const steps = [
   {
     number: "02",
     title: "Organize",
-    description: "Add a category and tags. Your library stays clean and searchable, even as it grows.",
+    description: "Add a category and thumbnail. Your library stays clean and searchable, even as it grows.",
   },
   {
     number: "03",

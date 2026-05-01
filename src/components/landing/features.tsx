@@ -18,8 +18,8 @@ const features = [
   },
   {
     icon: FolderOpen,
-    title: "Categories & tags",
-    description: "Organize by project, client, or workflow. Keep your library clean and navigable.",
+    title: "Categories & thumbnails",
+    description: "Organize prompts into categories with visual thumbnails. Find what you need at a glance.",
   },
   {
     icon: Search,

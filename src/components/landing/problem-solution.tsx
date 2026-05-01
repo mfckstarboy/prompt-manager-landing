@@ -13,7 +13,7 @@ const solutions = [
   "Entire prompt library, one click away",
   "Permanent library synced across all your devices",
   "Insert any prompt directly into any AI tool",
-  "Search across categories and tags in milliseconds",
+  "Search across categories and prompts in milliseconds",
 ];
 
 export function ProblemSolution() {

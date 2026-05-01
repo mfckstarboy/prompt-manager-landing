@@ -1,8 +1,23 @@
+import DodoPayments from "dodopayments";
 import { NextRequest, NextResponse } from "next/server";
 
-import { createDodoCheckoutUrl } from "@/lib/billing";
 import { getSiteUrl } from "@/lib/site-url";
 import { createClient } from "@/lib/supabase/server";
+
+function getDodoClient() {
+  const apiKey = process.env.DODO_API_KEY;
+
+  if (!apiKey) {
+    throw new Error("DODO_API_KEY is not configured.");
+  }
+
+  const isTestMode = process.env.DODO_ENV === "test_mode" || process.env.NODE_ENV !== "production";
+
+  return new DodoPayments({
+    bearerToken: apiKey,
+    environment: isTestMode ? "test_mode" : "live_mode",
+  });
+}
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -33,11 +48,27 @@ export async function POST(request: NextRequest) {
 
   const redirectUrl = `${getSiteUrl()}/upgrade/success`;
 
-  const url = createDodoCheckoutUrl({
-    userId: user.id,
-    productId,
-    redirectUrl,
-  });
+  try {
+    const dodo = getDodoClient();
 
-  return NextResponse.json({ url });
+    const session = await dodo.checkoutSessions.create({
+      product_cart: [{ product_id: productId, quantity: 1 }],
+      metadata: {
+        userId: user.id,
+        plan: "premium",
+      },
+      return_url: redirectUrl,
+    });
+
+    const checkoutUrl = session.checkout_url;
+
+    if (!checkoutUrl) {
+      return NextResponse.json({ error: "No checkout URL returned" }, { status: 500 });
+    }
+
+    return NextResponse.json({ url: checkoutUrl });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Checkout creation failed";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }

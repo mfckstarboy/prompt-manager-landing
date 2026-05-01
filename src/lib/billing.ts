@@ -1,17 +1,5 @@
 import crypto from "crypto";
 
-export function createDodoCheckoutUrl(params: {
-  userId: string;
-  productId: string;
-  redirectUrl: string;
-}): string {
-  const url = new URL("https://checkout.dodopayments.com/buy/" + params.productId);
-  url.searchParams.set("metadata[userId]", params.userId);
-  url.searchParams.set("metadata[plan]", "premium");
-  url.searchParams.set("redirect_url", params.redirectUrl);
-  return url.toString();
-}
-
 export function verifyDodoWebhookSignature(params: {
   rawBody: string;
   signature: string;

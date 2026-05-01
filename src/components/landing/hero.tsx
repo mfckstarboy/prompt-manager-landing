@@ -76,7 +76,7 @@ export function Hero() {
               </a>
             </Button>
           </div>
-          <p className="landing-small mt-2 text-muted-foreground">No credit card required &middot; Free plan available</p>
+          <p className="landing-small pt-6 text-muted-foreground">No credit card required &middot; Free plan available</p>
         </Reveal>
 
         <Reveal

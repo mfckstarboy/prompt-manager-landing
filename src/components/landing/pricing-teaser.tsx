@@ -57,7 +57,7 @@ export function PricingTeaser() {
 
               <div className="mt-8">
                 <Button variant="outline" className="landing-ui h-12 w-full" asChild>
-                  <Link href="/signup">Get started free</Link>
+                  <Link href="/login">Log in to subscribe</Link>
                 </Button>
               </div>
             </div>
@@ -99,7 +99,7 @@ export function PricingTeaser() {
                   className="landing-ui h-12 w-full bg-background text-foreground hover:bg-background/90"
                   asChild
                 >
-                  <Link href="/pricing">See pricing & upgrade</Link>
+                  <Link href="/login?plan=premium">Log in to subscribe</Link>
                 </Button>
               </div>
             </div>

@@ -25,7 +25,9 @@ export function ProblemSolution() {
             You&apos;re losing time to prompts you&apos;ve already written
           </h2>
           <p className="landing-body mx-auto max-w-2xl text-muted-foreground md:max-w-3xl">
-            AI power users waste hours every week recreating prompts from memory. PromptTray fixes that permanently.
+            AI power users waste hours every week recreating prompts from memory.{" "}
+            <br />
+            PromptTray fixes that permanently.
           </p>
         </Reveal>
 

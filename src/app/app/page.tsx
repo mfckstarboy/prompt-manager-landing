@@ -240,8 +240,8 @@ export default async function AppPage() {
     ? `${totalCategories} / Unlimited`
     : `${totalCategories} / ${FREE_CATEGORY_LIMIT}`;
   const recentPrompt = safePrompts[0] ?? null;
-  const extensionConnected = hasPrompts;
-  const extensionInstalled = hasPrompts;
+  const extensionConnected = true;
+  const extensionInstalled = true;
   const lastSync = recentPrompt ? formatRelativeTime(recentPrompt.created_at) : "No sync yet";
 
   return (

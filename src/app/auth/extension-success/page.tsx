@@ -162,103 +162,102 @@ function ExtensionSuccessContent() {
     getExtensionBridgeState(searchParams);
   const mode = searchParams.get("mode") === "signup" ? "signup" : "login";
 
-  useEffect(() => {
-    async function connectExtension() {
-      debugLog("[PromptTray Website] Extension success page mounted");
+  async function connectExtension() {
+    debugLog("[PromptTray Website] Extension success page mounted");
 
-      if (hasExtensionSource && isInvalidExtensionId) {
-        setState({
-          message: "PromptTray could not verify the Chrome extension connection. Please start again from the extension.",
-          status: "error",
-        });
-        return;
-      }
+    setState({
+      message: "Connecting your website session to PromptTray in Chrome...",
+      status: "loading",
+    });
 
-      if (!isExtensionFlow) {
-        setState({
-          message: isMissingExtensionId
-            ? "Missing extension connection details. Please start again from PromptTray."
-            : "PromptTray could not verify the Chrome extension connection. Please start again from the extension.",
-          status: "error",
-        });
-        return;
-      }
-
-      debugLog("[PromptTray Website] ext_id found", { extensionId, mode });
-
-      const session = await waitForExtensionSession(supabase);
-
-      if (!session?.access_token || !session.refresh_token) {
-        debugLog("[PromptTray Website] Handoff stopped because no usable session was available", {
-          hasAccessToken: Boolean(session?.access_token),
-          hasRefreshToken: Boolean(session?.refresh_token),
-          hasSession: Boolean(session),
-        });
-        setState({
-          message: "Your website session is not ready yet. Log in again and retry the extension connection.",
-          status: "error",
-        });
-        return;
-      }
-
-      try {
-        debugLog("[PromptTray Website] Actual session object shape", {
-          sessionType: typeof session,
-          sessionKeys: Object.keys(session || {}),
-          userKeys: Object.keys(session.user || {}),
-        });
-        debugLog("[PromptTray Website] Preparing auth session for extension handoff", {
-          extensionId,
-          hasAccessToken: Boolean(session.access_token),
-          hasRefreshToken: Boolean(session.refresh_token),
-          mode,
-          userEmail: session.user.email ?? "",
-          userId: session.user.id,
-        });
-
-        const handoffWindow = window as ExtensionHandoffWindow;
-        const handoffKey = `${extensionId}:${session.access_token}`;
-
-        if (
-          handoffWindow.__promptTrayExtensionHandoffKey === handoffKey &&
-          handoffWindow.__promptTrayExtensionHandoffPromise
-        ) {
-          await handoffWindow.__promptTrayExtensionHandoffPromise;
-        } else {
-          const handoffPromise = sendSessionToExtension(extensionId, session);
-          handoffWindow.__promptTrayExtensionHandoffKey = handoffKey;
-          handoffWindow.__promptTrayExtensionHandoffPromise = handoffPromise;
-          await handoffPromise;
-        }
-
-        setState({
-          message: `PromptTray in Chrome is now connected${session.user.email ? ` as ${session.user.email}` : ""}.`,
-          status: "success",
-        });
-      } catch (caughtError) {
-        console.error("[PromptTray Website] Extension handoff failed", caughtError);
-        const message =
-          caughtError instanceof Error
-            ? caughtError.message
-            : "PromptTray could not complete the extension handoff.";
-
-        setState({
-          message,
-          status: "error",
-        });
-      }
+    if (hasExtensionSource && isInvalidExtensionId) {
+      setState({
+        message: "PromptTray could not verify the Chrome extension connection. Please start again from the extension.",
+        status: "error",
+      });
+      return;
     }
 
-    connectExtension();
-  }, [
-    extensionId,
-    hasExtensionSource,
-    isExtensionFlow,
-    isInvalidExtensionId,
-    isMissingExtensionId,
-    mode,
-    supabase,
-  ]);
+    if (!isExtensionFlow) {
+      setState({
+        message: isMissingExtensionId
+          ? "Missing extension connection details. Please start again from PromptTray."
+          : "PromptTray could not verify the Chrome extension connection. Please start again from the extension.",
+        status: "error",
+      });
+      return;
+    }
+
+    debugLog("[PromptTray Website] ext_id found", { extensionId, mode });
+
+    const session = await waitForExtensionSession(supabase);
+
+    if (!session?.access_token || !session.refresh_token) {
+      debugLog("[PromptTray Website] Handoff stopped because no usable session was available", {
+        hasAccessToken: Boolean(session?.access_token),
+        hasRefreshToken: Boolean(session?.refresh_token),
+        hasSession: Boolean(session),
+      });
+      setState({
+        message: "Your website session is not ready yet. Log in again and retry the extension connection.",
+        status: "error",
+      });
+      return;
+    }
+
+    try {
+      debugLog("[PromptTray Website] Actual session object shape", {
+        sessionType: typeof session,
+        sessionKeys: Object.keys(session || {}),
+        userKeys: Object.keys(session.user || {}),
+      });
+      debugLog("[PromptTray Website] Preparing auth session for extension handoff", {
+        extensionId,
+        hasAccessToken: Boolean(session.access_token),
+        hasRefreshToken: Boolean(session.refresh_token),
+        mode,
+        userEmail: session.user.email ?? "",
+        userId: session.user.id,
+      });
+
+      const handoffWindow = window as ExtensionHandoffWindow;
+      const handoffKey = `${extensionId}:${session.access_token}`;
+
+      if (
+        handoffWindow.__promptTrayExtensionHandoffKey === handoffKey &&
+        handoffWindow.__promptTrayExtensionHandoffPromise
+      ) {
+        await handoffWindow.__promptTrayExtensionHandoffPromise;
+      } else {
+        const handoffPromise = sendSessionToExtension(extensionId, session);
+        handoffWindow.__promptTrayExtensionHandoffKey = handoffKey;
+        handoffWindow.__promptTrayExtensionHandoffPromise = handoffPromise;
+        await handoffPromise;
+      }
+
+      setState({
+        message: `PromptTray in Chrome is now connected${session.user.email ? ` as ${session.user.email}` : ""}.`,
+        status: "success",
+      });
+    } catch (caughtError) {
+      console.error("[PromptTray Website] Extension handoff failed", caughtError);
+      const message =
+        caughtError instanceof Error
+          ? caughtError.message
+          : "PromptTray could not complete the extension handoff.";
+
+      setState({
+        message,
+        status: "error",
+      });
+    }
+  }
+
+  useEffect(() => {
+    void connectExtension();
+  // connectExtension reads searchParams-derived values captured in closure at render time
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <AuthShell
@@ -298,14 +297,23 @@ function ExtensionSuccessContent() {
         </div>
 
         {state.status === "error" ? (
-          <p className="landing-small text-center text-muted-foreground">
-            <Link
-              href={withExtensionBridge("/login", extensionId)}
-              className="font-medium text-foreground hover:text-primary"
+          <div className="flex flex-col items-center gap-2">
+            <Button
+              variant="outline"
+              className="landing-ui h-11 w-full"
+              onClick={() => void connectExtension()}
             >
-              Return to login
-            </Link>
-          </p>
+              Try again
+            </Button>
+            <p className="landing-small text-center text-muted-foreground">
+              <Link
+                href={withExtensionBridge("/login", extensionId)}
+                className="font-medium text-foreground hover:text-primary"
+              >
+                Return to login
+              </Link>
+            </p>
+          </div>
         ) : null}
       </div>
     </AuthShell>

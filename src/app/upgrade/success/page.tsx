@@ -28,8 +28,6 @@ export default function UpgradeSuccessPage() {
 
   useEffect(() => {
     cancelledRef.current = false;
-    const MAX_ATTEMPTS = 10;
-    let attempt = 0;
     let timeoutId: ReturnType<typeof setTimeout>;
 
     async function checkEntitlement() {
@@ -40,6 +38,8 @@ export default function UpgradeSuccessPage() {
         const {
           data: { user },
         } = await supabase.auth.getUser();
+
+        if (cancelledRef.current) return;
 
         if (!user) {
           setVerifyState("pending");
@@ -54,24 +54,14 @@ export default function UpgradeSuccessPage() {
 
         if (cancelledRef.current) return;
 
-        if (isPremiumEntitlement(entitlement)) {
-          setVerifyState("confirmed");
-          return;
-        }
-
-        attempt++;
-        if (attempt >= MAX_ATTEMPTS) {
-          setVerifyState("pending");
-          return;
-        }
-
-        timeoutId = setTimeout(() => void checkEntitlement(), 2000);
+        setVerifyState(isPremiumEntitlement(entitlement) ? "confirmed" : "pending");
       } catch {
         if (!cancelledRef.current) setVerifyState("pending");
       }
     }
 
-    void checkEntitlement();
+    // Give the webhook ~2 s to land, then check once and show the result immediately.
+    timeoutId = setTimeout(() => void checkEntitlement(), 2000);
 
     return () => {
       cancelledRef.current = true;
@@ -171,20 +161,16 @@ export default function UpgradeSuccessPage() {
             </div>
           </div>
         ) : (
-          <div className="w-full max-w-md rounded-[32px] border border-amber-200 bg-amber-50/80 px-8 py-10 text-center shadow-[0_28px_70px_-48px_rgba(15,23,42,0.24)]">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-100">
+          <div className="w-full max-w-md rounded-[32px] border border-red-200 bg-red-50/80 px-8 py-10 text-center shadow-[0_28px_70px_-48px_rgba(15,23,42,0.24)]">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-100">
               <svg
-                className="h-7 w-7 text-amber-600"
+                className="h-7 w-7 text-red-500"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
                 strokeWidth={2}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </div>
 
@@ -192,18 +178,17 @@ export default function UpgradeSuccessPage() {
               className="mt-6 text-[32px] leading-[36px] tracking-[-0.01em] text-foreground"
               style={{ fontFamily: "Instrument Serif, serif", fontWeight: 400 }}
             >
-              Payment received
+              Payment not confirmed
             </h1>
 
             <p className="landing-body mt-4 text-muted-foreground">
-              Your payment was processed but your account is still being upgraded. This can take up
-              to a minute. Check your dashboard — if it still shows Free, refresh the page in a
-              moment.
+              We could not confirm your payment. Your account has not been upgraded. Please try
+              again or contact support if you believe this is a mistake.
             </p>
 
             <div className="mt-8 flex flex-col gap-3">
               <Button asChild className="landing-ui h-12 w-full">
-                <Link href="/app">Go to dashboard</Link>
+                <Link href="/pricing">Try once more</Link>
               </Button>
               <Button asChild variant="outline" className="landing-ui h-12 w-full">
                 <Link href="/support">Contact support</Link>

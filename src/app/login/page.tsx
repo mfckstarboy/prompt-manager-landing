@@ -60,6 +60,10 @@ function LoginPageContent() {
         return;
       }
 
+      if (searchParams.get("plan") === "premium") {
+        localStorage.setItem("prompttray.pendingPlan", "premium");
+      }
+
       router.push(
         isExtensionFlow ? buildExtensionSuccessPath(extensionId, "login") : "/app"
       );

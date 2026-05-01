@@ -22,6 +22,7 @@ import { CHROME_WEB_STORE_URL } from "@/lib/chrome-web-store";
 import { createClient } from "@/lib/supabase/server";
 
 import { LogoutButton } from "./logout-button";
+import { PendingPlanRedirect } from "./pending-plan-redirect";
 
 type CategoryRow = {
   id: string;
@@ -246,6 +247,7 @@ export default async function AppPage() {
 
   return (
     <main className="landing-page min-h-screen bg-[#f6f7fb] text-foreground">
+      <PendingPlanRedirect />
       <div className="border-b border-border/80 bg-background/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
           <Link href="/" className="transition-opacity duration-200 hover:opacity-80">

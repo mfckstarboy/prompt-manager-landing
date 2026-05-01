@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Check } from "lucide-react";
 import { useState } from "react";
 
@@ -22,7 +23,7 @@ const PREMIUM_FEATURES = [
   "Priority support",
 ];
 
-export function PricingContent() {
+export function PricingContent({ isAuthenticated }: { isAuthenticated: boolean }) {
   const [interval, setInterval] = useState<"monthly" | "annual">("monthly");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -113,9 +114,15 @@ export function PricingContent() {
           </ul>
 
           <div className="mt-8">
-            <Button variant="outline" className="landing-ui h-12 w-full" disabled>
-              Current plan
-            </Button>
+            {isAuthenticated ? (
+              <Button variant="outline" className="landing-ui h-12 w-full" disabled>
+                Current plan
+              </Button>
+            ) : (
+              <Button asChild variant="outline" className="landing-ui h-12 w-full">
+                <Link href="/signup">Get started free</Link>
+              </Button>
+            )}
           </div>
         </div>
 
@@ -146,13 +153,27 @@ export function PricingContent() {
           </ul>
 
           <div className="mt-8 space-y-3">
-            <Button
-              className="landing-ui h-12 w-full bg-background text-foreground hover:bg-background/90"
-              onClick={handleUpgrade}
-              disabled={isLoading}
-            >
-              {isLoading ? "Redirecting to checkout…" : "Upgrade to Premium"}
-            </Button>
+            {isAuthenticated ? (
+              <Button
+                className="landing-ui h-12 w-full bg-background text-foreground hover:bg-background/90"
+                onClick={handleUpgrade}
+                disabled={isLoading}
+              >
+                {isLoading ? "Redirecting to checkout…" : "Upgrade to Premium"}
+              </Button>
+            ) : (
+              <>
+                <Button asChild className="landing-ui h-12 w-full bg-background text-foreground hover:bg-background/90">
+                  <Link href="/signup?plan=premium">Sign up & upgrade</Link>
+                </Button>
+                <p className="landing-small text-center text-background/60">
+                  Already have an account?{" "}
+                  <Link href="/login?plan=premium" className="font-medium text-background hover:text-background/80">
+                    Sign in
+                  </Link>
+                </p>
+              </>
+            )}
             {error ? (
               <p className="landing-small rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-2.5 text-red-300">
                 {error}

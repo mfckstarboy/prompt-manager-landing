@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 import { PromptTrayLogo } from "@/components/landing/prompttray-logo";
 import { createClient } from "@/lib/supabase/server";
@@ -17,9 +16,7 @@ export default async function PricingPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect("/login");
-  }
+  const isAuthenticated = Boolean(user);
 
   return (
     <main className="landing-page min-h-screen bg-[#f6f7fb] text-foreground">
@@ -28,12 +25,21 @@ export default async function PricingPage() {
           <Link href="/" className="transition-opacity duration-200 hover:opacity-80">
             <PromptTrayLogo className="h-6 text-foreground" />
           </Link>
-          <Link
-            href="/app"
-            className="landing-small font-medium text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Back to dashboard
-          </Link>
+          {isAuthenticated ? (
+            <Link
+              href="/app"
+              className="landing-small font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Back to dashboard
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="landing-small font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Log in
+            </Link>
+          )}
         </div>
       </div>
 
@@ -51,7 +57,7 @@ export default async function PricingPage() {
           </p>
         </div>
 
-        <PricingContent />
+        <PricingContent isAuthenticated={isAuthenticated} />
       </div>
     </main>
   );

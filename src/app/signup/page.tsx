@@ -63,6 +63,10 @@ function SignupPageContent() {
         return;
       }
 
+      if (searchParams.get("plan") === "premium" && data.session) {
+        localStorage.setItem("prompttray.pendingPlan", "premium");
+      }
+
       if (isExtensionFlow && data.session) {
         router.push(buildExtensionSuccessPath(extensionId, "signup"));
       } else if (data.session) {

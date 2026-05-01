@@ -50,7 +50,7 @@ export function Hero() {
         <Reveal className="mx-auto mb-16 max-w-3xl text-center" variant="fade-up" delay={160}>
           <div className="landing-label mb-6 inline-flex items-center gap-2 rounded-full bg-accent px-3 py-1.5 text-accent-foreground">
             <Sparkles className="h-4 w-4 text-primary" />
-            Works inside ChatGPT
+            Works in ChatGPT, Claude, Gemini &amp; Perplexity
           </div>
 
           <h1 className="landing-h1 mb-6 text-balance">
@@ -58,8 +58,8 @@ export function Hero() {
           </h1>
 
           <p className="landing-body-lg mx-auto mb-8 max-w-xl text-muted-foreground text-pretty">
-            Save, organize, and instantly reuse your best prompts directly inside AI tools. Save
-            once. Use forever.
+            PromptTray lives inside ChatGPT, Claude, Gemini, and Perplexity. Save your best prompts
+            once — insert them anywhere with a single click.
           </p>
 
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -76,7 +76,7 @@ export function Hero() {
               </a>
             </Button>
           </div>
-          <p className="landing-small mt-2 text-muted-foreground">No credit card required</p>
+          <p className="landing-small mt-2 text-muted-foreground">No credit card required &middot; Free plan available</p>
         </Reveal>
 
         <Reveal

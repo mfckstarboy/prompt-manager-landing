@@ -13,32 +13,32 @@ const features = [
   {
     icon: Save,
     title: "Save prompts",
-    description: "Capture your best prompts with one click. Never lose a working prompt again.",
+    description: "Capture any prompt with one click. It's saved instantly — never rewrite it again.",
   },
   {
     icon: FolderOpen,
     title: "Categories & tags",
-    description: "Organize by project, topic, or any system that works for you.",
+    description: "Organize by project, client, or workflow. Keep your library clean and navigable.",
   },
   {
     icon: Search,
     title: "Instant search",
-    description: "Find any prompt in milliseconds with powerful full-text search.",
+    description: "Find any prompt in milliseconds. Full-text search across your entire library.",
   },
   {
     icon: MousePointerClick,
     title: "One-click insert",
-    description: "Insert prompts directly into any AI tool with a single click.",
+    description: "Click once to insert any prompt into ChatGPT, Claude, Gemini, or Perplexity.",
   },
   {
     icon: PanelRight,
-    title: "Sidebar access",
-    description: "Your prompts live in a clean sidebar, always within reach.",
+    title: "Native in every AI tool",
+    description: "A sidebar that lives inside ChatGPT, Claude, Gemini, and Perplexity. No tab switching.",
   },
   {
     icon: Cloud,
     title: "Cloud sync",
-    description: "Access your prompts from any device. Everything stays in sync.",
+    description: "Your library lives in the cloud. Accessible from any device, always up to date.",
   },
 ];
 
@@ -47,9 +47,9 @@ export function Features() {
     <section id="features" className="px-6 py-24">
       <div className="mx-auto max-w-6xl">
         <Reveal className="mb-16 text-center" variant="fade-up">
-          <h2 className="landing-h2 mb-4">Everything you need</h2>
+          <h2 className="landing-h2 mb-4">Built for AI power users</h2>
           <p className="landing-body mx-auto max-w-xl text-muted-foreground md:max-w-2xl">
-            Simple tools that make managing prompts effortless.
+            A clean sidebar that lives inside your AI tools — no tab switching, no copy-pasting.
           </p>
         </Reveal>
 

@@ -4,17 +4,17 @@ const steps = [
   {
     number: "01",
     title: "Save",
-    description: "Click the PromptTray button to save any prompt you write.",
+    description: "Click the PromptTray button inside any AI tool to save your prompt. Takes one second.",
   },
   {
     number: "02",
     title: "Organize",
-    description: "Add categories and tags to keep everything findable.",
+    description: "Add a category and tags. Your library stays clean and searchable, even as it grows.",
   },
   {
     number: "03",
     title: "Reuse",
-    description: "Insert any saved prompt with one click. Instant.",
+    description: "Search your library and insert any prompt with a single click. No retyping, ever.",
   },
 ];
 
@@ -25,7 +25,7 @@ export function HowItWorks() {
         <Reveal className="mb-16 text-center" variant="fade-up">
           <h2 className="landing-h2 mb-4">How it works</h2>
           <p className="landing-body mx-auto max-w-xl text-muted-foreground md:max-w-2xl">
-            Three simple steps. That&apos;s it.
+            Three steps. Ready in under a minute.
           </p>
         </Reveal>
 

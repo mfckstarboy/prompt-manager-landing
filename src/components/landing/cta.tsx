@@ -5,7 +5,7 @@ import { Reveal, RevealGroup, RevealItem } from "@/components/landing/landing-mo
 import { Button } from "@/components/ui/button";
 import { CHROME_WEB_STORE_URL } from "@/lib/chrome-web-store";
 
-const benefits = ["Free to start", "No credit card required", "Works inside ChatGPT"];
+const benefits = ["Free to start", "Works in 4 AI tools", "No credit card required"];
 
 export function CTA() {
   return (
@@ -16,10 +16,10 @@ export function CTA() {
 
       <Reveal className="relative z-10 mx-auto max-w-3xl text-center" variant="fade-up">
         <h2 className="landing-h2 mb-4 text-balance">
-          Your prompts. Always ready.
+          Your best prompts, always within reach.
         </h2>
         <p className="landing-body mx-auto mb-8 max-w-xl opacity-80 md:max-w-2xl">
-          Used by designers, developers, and marketers who finally stopped rewriting the same prompts over and over.
+          Join designers, developers, and marketers who stopped rewriting prompts and started moving faster.
         </p>
 
         <Button asChild size="lg" className="landing-ui h-14 gap-2 px-8">

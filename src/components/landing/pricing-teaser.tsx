@@ -5,15 +5,15 @@ import { Reveal, RevealGroup, RevealItem } from "@/components/landing/landing-mo
 import { Button } from "@/components/ui/button";
 
 const FREE_HIGHLIGHTS = [
+  "Works in ChatGPT, Claude, Gemini, Perplexity",
   "Up to 30 prompts",
   "Up to 5 categories",
-  "Works in ChatGPT, Claude, Gemini, Perplexity",
   "Sync across devices",
 ];
 
 const PREMIUM_HIGHLIGHTS = [
   "Unlimited prompts & categories",
-  "Variables in prompts",
+  "Variables in prompts — build reusable templates",
   "Version history",
   "Works in ChatGPT, Claude, Gemini, Perplexity",
   "Sync across devices",
@@ -25,9 +25,9 @@ export function PricingTeaser() {
     <section id="pricing" className="px-6 py-24">
       <div className="mx-auto max-w-5xl">
         <Reveal className="mb-16 text-center" variant="fade-up">
-          <h2 className="landing-h2 mb-4">Simple pricing</h2>
+          <h2 className="landing-h2 mb-4">Start free. Upgrade when you&apos;re ready.</h2>
           <p className="landing-body mx-auto max-w-xl text-muted-foreground">
-            Start free. Upgrade when you need more.
+            No lock-in, no card needed. Most users are surprised how far the free plan takes them.
           </p>
         </Reveal>
 

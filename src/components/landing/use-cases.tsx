@@ -6,7 +6,7 @@ const useCases = [
   {
     icon: Palette,
     role: "Designers",
-    quote: "I keep all my AI workflows in one place instead of rewriting prompts every time.",
+    quote: "I stopped rebuilding prompts for every iteration. My Midjourney and ChatGPT workflows finally feel like a real system.",
     attribution: "— UX Designer",
     prompts: [
       "Reusing the same prompts across multiple design iterations (Midjourney, UI ideas, moodboards)",
@@ -17,7 +17,7 @@ const useCases = [
   {
     icon: Code,
     role: "Developers",
-    quote: "I don’t waste time rewriting the same prompts for debugging and code tasks.",
+    quote: "Debugging prompts, code review templates, docs prompts — all one click away. It’s like muscle memory now.",
     attribution: "— Software Developer",
     prompts: [
       "Reusing prompts for debugging, code review, and documentation",
@@ -28,7 +28,7 @@ const useCases = [
   {
     icon: Megaphone,
     role: "Marketers",
-    quote: "My entire content workflow runs faster because I reuse what already works.",
+    quote: "I built a prompt library for every campaign type. My team reuses what works instead of starting from scratch every time.",
     attribution: "— Marketing Manager",
     prompts: [
       "Reusing high-performing prompts for ads, emails, and social content",
@@ -45,7 +45,7 @@ export function UseCases() {
         <Reveal className="mb-16 text-center" variant="fade-up">
           <h2 className="landing-h2 mb-4">Built for how you work</h2>
           <p className="landing-body mx-auto max-w-xl text-muted-foreground md:max-w-2xl">
-            Whether you design, code, or market - PromptTray fits your workflow.
+            Whether you&apos;re designing, coding, or marketing — PromptTray fits your workflow.
           </p>
         </Reveal>
 

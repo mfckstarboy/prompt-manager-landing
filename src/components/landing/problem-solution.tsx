@@ -3,17 +3,17 @@ import { Check, X } from "lucide-react";
 import { Reveal, RevealGroup, RevealItem } from "@/components/landing/landing-motion";
 
 const problems = [
-  "Rewriting the same prompts over and over",
-  "Losing great prompts in chat history",
-  "Copy-pasting from random documents",
-  "No organization for different use cases",
+  "Rewriting the same prompts from memory, every time",
+  "Great prompts lost forever in chat history",
+  "Copy-pasting from scattered notes and documents",
+  "No organization across different AI tools",
 ];
 
 const solutions = [
-  "One-click access to all your prompts",
-  "Permanent library synced across devices",
-  "Insert directly into any AI tool",
-  "Categories and tags for instant search",
+  "Entire prompt library, one click away",
+  "Permanent library synced across all your devices",
+  "Insert any prompt directly into any AI tool",
+  "Search across categories and tags in milliseconds",
 ];
 
 export function ProblemSolution() {
@@ -22,10 +22,10 @@ export function ProblemSolution() {
       <div className="mx-auto max-w-6xl">
         <Reveal className="mb-16 text-center" variant="fade-up">
           <h2 className="landing-h2 mb-4 text-balance">
-            Your workflow is broken
+            You&apos;re losing time to prompts you&apos;ve already written
           </h2>
           <p className="landing-body mx-auto max-w-2xl text-muted-foreground md:max-w-3xl">
-            Every day, you waste time recreating prompts you already wrote. PromptTray fixes that.
+            AI power users waste hours every week recreating prompts from memory. PromptTray fixes that permanently.
           </p>
         </Reveal>
 

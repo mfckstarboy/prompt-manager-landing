@@ -1,7 +1,6 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import DodoPayments from "dodopayments";
 import { NextRequest, NextResponse } from "next/server";
-
-import { verifyDodoWebhookSignature } from "@/lib/billing";
 
 function getServiceRoleClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -55,41 +54,49 @@ export async function POST(request: NextRequest) {
   }
 
   const rawBody = await request.text();
-  const signature = request.headers.get("webhook-signature") ?? "";
 
-  let isValid: boolean;
+  const headers: Record<string, string> = {};
+  request.headers.forEach((value, key) => {
+    headers[key] = value;
+  });
+
+  const dodo = new DodoPayments({
+    bearerToken: process.env.DODO_API_KEY ?? "",
+    webhookKey: webhookSecret,
+  });
+
+  let event: ReturnType<typeof dodo.webhooks.unsafeUnwrap>;
   try {
-    isValid = verifyDodoWebhookSignature({
-      rawBody,
-      signature,
-      secret: webhookSecret,
-    });
+    event = dodo.webhooks.unwrap(rawBody, { headers, key: webhookSecret });
   } catch {
-    return NextResponse.json({ error: "Signature verification failed" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid webhook signature" }, { status: 400 });
   }
-
-  if (!isValid) {
-    return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
-  }
-
-  let event: { type: string; data: Record<string, unknown> };
-  try {
-    event = JSON.parse(rawBody) as { type: string; data: Record<string, unknown> };
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
-  }
-
-  const { type, data } = event;
-  const userId = (data?.metadata as Record<string, string> | undefined)?.userId;
-  const customerId = (data?.customer_id ?? data?.customerId ?? "") as string;
-  const periodEnd = (data?.current_period_end ?? data?.next_billing_date ?? null) as string | null;
 
   try {
-    if (type === "subscription.active" || type === "payment.succeeded") {
+    if (event.type === "subscription.active" || event.type === "subscription.renewed") {
+      const sub = event.data;
+      const userId = sub.metadata?.userId;
+      const customerId = sub.customer.customer_id;
+      const periodEnd = sub.next_billing_date ?? null;
+
       if (userId) {
         await upsertPremiumEntitlement(userId, customerId, periodEnd);
       }
-    } else if (type === "subscription.cancelled" || type === "subscription.expired") {
+    } else if (event.type === "payment.succeeded") {
+      const payment = event.data;
+      const userId = payment.metadata?.userId;
+      const customerId = payment.customer.customer_id;
+
+      if (userId) {
+        await upsertPremiumEntitlement(userId, customerId, null);
+      }
+    } else if (
+      event.type === "subscription.cancelled" ||
+      event.type === "subscription.expired"
+    ) {
+      const sub = event.data;
+      const userId = sub.metadata?.userId;
+
       if (userId) {
         await downgradeToFree(userId);
       }

@@ -9,14 +9,15 @@ const FREE_FEATURES = [
   "Up to 30 prompts",
   "Up to 5 categories",
   "Sync across devices",
-  "Works in ChatGPT, Claude, Gemini",
+  "Works in ChatGPT, Claude, Gemini, Perplexity",
 ];
 
 const PREMIUM_FEATURES = [
   "Unlimited prompts",
   "Unlimited categories",
   "Sync across devices",
-  "Works in ChatGPT, Claude, Gemini",
+  "Works in ChatGPT, Claude, Gemini, Perplexity",
+  "Variables in prompts",
   "Version history",
   "Priority support",
 ];
@@ -125,12 +126,14 @@ export function PricingContent() {
               className="text-[42px] leading-none tracking-[-0.03em] text-background"
               style={{ fontFamily: "Instrument Serif, serif", fontWeight: 400 }}
             >
-              {isAnnual ? "$4" : "$5"}
+              {isAnnual ? "$48" : "$5"}
             </span>
-            <span className="landing-small mb-1 text-background/60">/ month</span>
+            <span className="landing-small mb-1 text-background/60">
+              {isAnnual ? "/ year" : "/ month"}
+            </span>
           </div>
           <p className="landing-small mt-2 text-background/60">
-            {isAnnual ? "Billed annually — save 20%" : "Billed monthly"}
+            {isAnnual ? "$4 / month — save 20%" : "Billed monthly"}
           </p>
 
           <ul className="mt-6 space-y-3">

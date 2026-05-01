@@ -4,6 +4,7 @@ import { Footer } from "@/components/landing/footer";
 import { Header } from "@/components/landing/header";
 import { Hero } from "@/components/landing/hero";
 import { HowItWorks } from "@/components/landing/how-it-works";
+import { PricingTeaser } from "@/components/landing/pricing-teaser";
 import { ProblemSolution } from "@/components/landing/problem-solution";
 import { UseCases } from "@/components/landing/use-cases";
 
@@ -16,6 +17,7 @@ export default function PromptTrayLanding() {
       <Features />
       <HowItWorks />
       <UseCases />
+      <PricingTeaser />
       <CTA />
       <Footer />
     </main>

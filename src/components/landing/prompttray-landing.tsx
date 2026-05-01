@@ -8,10 +8,10 @@ import { PricingTeaser } from "@/components/landing/pricing-teaser";
 import { ProblemSolution } from "@/components/landing/problem-solution";
 import { UseCases } from "@/components/landing/use-cases";
 
-export default function PromptTrayLanding() {
+export default function PromptTrayLanding({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
   return (
     <main className="landing-page min-h-screen bg-background">
-      <Header />
+      <Header isLoggedIn={isLoggedIn} />
       <Hero />
       <ProblemSolution />
       <Features />

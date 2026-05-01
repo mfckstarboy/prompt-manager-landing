@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import PromptTrayLanding from "@/components/landing/prompttray-landing";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   alternates: {
@@ -8,6 +9,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Home() {
-  return <PromptTrayLanding />;
+export default async function Home() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  return <PromptTrayLanding isLoggedIn={!!user} />;
 }

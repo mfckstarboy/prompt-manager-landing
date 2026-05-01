@@ -12,7 +12,7 @@ import { CHROME_WEB_STORE_URL } from "@/lib/chrome-web-store";
 const navLinkClassName =
   "landing-nav relative text-muted-foreground transition-[color,opacity] duration-200 hover:text-foreground after:absolute after:-bottom-1 after:left-0 after:h-px after:w-full after:origin-left after:scale-x-0 after:bg-current after:opacity-60 after:transition-transform after:duration-200 after:content-[''] hover:after:scale-x-100";
 
-export function Header() {
+export function Header({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -36,15 +36,23 @@ export function Header() {
           </nav>
 
           <div className="hidden items-center gap-3 md:flex">
-            <Button asChild variant="ghost" size="sm" className="landing-ui">
-              <Link href="/login">Sign in</Link>
-            </Button>
-            <Button asChild size="sm" className="landing-ui gap-2">
-              <a href={CHROME_WEB_STORE_URL} target="_blank" rel="noreferrer">
-                <Chrome className="h-4 w-4" />
-                Add to Chrome
-              </a>
-            </Button>
+            {isLoggedIn ? (
+              <Button asChild size="sm" className="landing-ui">
+                <Link href="/app">Dashboard</Link>
+              </Button>
+            ) : (
+              <>
+                <Button asChild variant="ghost" size="sm" className="landing-ui">
+                  <Link href="/login">Sign in</Link>
+                </Button>
+                <Button asChild size="sm" className="landing-ui gap-2">
+                  <a href={CHROME_WEB_STORE_URL} target="_blank" rel="noreferrer">
+                    <Chrome className="h-4 w-4" />
+                    Add to Chrome
+                  </a>
+                </Button>
+              </>
+            )}
           </div>
 
           <button
@@ -78,15 +86,23 @@ export function Header() {
               Use cases
             </a>
             <hr className="border-border" />
-            <Button asChild variant="ghost" size="sm" className="landing-ui justify-start">
-              <Link href="/login">Sign in</Link>
-            </Button>
-            <Button asChild size="sm" className="landing-ui gap-2">
-              <a href={CHROME_WEB_STORE_URL} target="_blank" rel="noreferrer">
-                <Chrome className="h-4 w-4" />
-                Add to Chrome
-              </a>
-            </Button>
+            {isLoggedIn ? (
+              <Button asChild size="sm" className="landing-ui justify-start">
+                <Link href="/app">Dashboard</Link>
+              </Button>
+            ) : (
+              <>
+                <Button asChild variant="ghost" size="sm" className="landing-ui justify-start">
+                  <Link href="/login">Sign in</Link>
+                </Button>
+                <Button asChild size="sm" className="landing-ui gap-2">
+                  <a href={CHROME_WEB_STORE_URL} target="_blank" rel="noreferrer">
+                    <Chrome className="h-4 w-4" />
+                    Add to Chrome
+                  </a>
+                </Button>
+              </>
+            )}
           </nav>
         </div>
       )}

@@ -10,9 +10,16 @@ import { createClient } from "@/lib/supabase/server";
 import { AccountSettingsForm } from "./account-settings-form";
 import { LogoutButton } from "../app/logout-button";
 
+const AI_SERVICES = [
+  { label: "ChatGPT", href: "https://chatgpt.com/" },
+  { label: "Gemini", href: "https://gemini.google.com/" },
+  { label: "Claude", href: "https://claude.ai/" },
+  { label: "Perplexity", href: "https://perplexity.ai/" },
+] as const;
+
 export const metadata: Metadata = {
   title: "Manage Account",
-  description: "Manage your PromptTray account and connection details.",
+  description: "Manage your PromptTray account and sync settings.",
   robots: { index: false, follow: false },
 };
 
@@ -59,8 +66,8 @@ export default async function AccountRoute() {
               Account details
             </h1>
             <p className="landing-body mt-4 max-w-2xl text-muted-foreground md:text-lg">
-              Your PromptTray account keeps sync, access, and overview in one place while prompt
-              work stays inside ChatGPT.
+              Your PromptTray account keeps your prompts synced and accessible across every AI tool
+              you use.
             </p>
 
             <div className="mt-8 grid gap-4">
@@ -73,7 +80,8 @@ export default async function AccountRoute() {
                     <p className="landing-label text-muted-foreground">Connection</p>
                     <p className="landing-h4 mt-1 text-base text-foreground">Account connected</p>
                     <p className="landing-small mt-2 text-muted-foreground">
-                      PromptTray is ready inside ChatGPT when the extension is installed.
+                      PromptTray is ready inside ChatGPT, Claude, Gemini, Perplexity and more once
+                      the extension is installed.
                     </p>
                   </div>
                 </div>
@@ -87,7 +95,7 @@ export default async function AccountRoute() {
                   <div>
                     <p className="landing-label text-muted-foreground">Extension</p>
                     <p className="landing-h4 mt-1 text-base text-foreground">
-                      Use PromptTray inside ChatGPT
+                      Use PromptTray across your AI tools
                     </p>
                     <p className="landing-small mt-2 text-muted-foreground">
                       Save, organize, and insert prompts from the sidebar while this page stays
@@ -110,17 +118,27 @@ export default async function AccountRoute() {
                 Quick actions
               </h2>
               <p className="landing-body mt-2 text-muted-foreground">
-                Open the right place depending on what you want to do next.
+                Jump straight into any supported AI tool.
               </p>
 
-              <div className="mt-6 flex flex-col gap-3">
-                <Button asChild className="landing-ui h-12 gap-2 px-5">
-                  <a href="https://chatgpt.com/" target="_blank" rel="noreferrer">
-                    Open ChatGPT
-                    <ArrowUpRight className="h-4 w-4" />
-                  </a>
-                </Button>
-                <Button asChild variant="outline" className="landing-ui h-12 gap-2 px-5">
+              <div className="mt-6 grid grid-cols-2 gap-2">
+                {AI_SERVICES.map((service) => (
+                  <Button
+                    key={service.href}
+                    asChild
+                    variant="outline"
+                    className="landing-ui h-11 gap-1.5 px-4 text-sm"
+                  >
+                    <a href={service.href} target="_blank" rel="noreferrer">
+                      {service.label}
+                      <ArrowUpRight className="h-3.5 w-3.5" />
+                    </a>
+                  </Button>
+                ))}
+              </div>
+
+              <div className="mt-3">
+                <Button asChild variant="ghost" className="landing-ui h-11 w-full gap-2 px-5">
                   <Link href="/support">
                     Help
                     <LifeBuoy className="h-4 w-4" />

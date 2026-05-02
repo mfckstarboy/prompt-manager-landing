@@ -3,21 +3,23 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
+  title: "Dashboard",
+  description: "PromptTray account dashboard and extension sync overview.",
   robots: { index: false, follow: false },
 };
+
 import {
-  ArrowUpRight,
-  CheckCircle2,
-  Download,
+  ChevronRight,
+  CloudDownload,
+  Globe,
   LayoutGrid,
-  LifeBuoy,
   Puzzle,
+  ShieldCheck,
   Sparkles,
-  UserRound,
+  Zap,
 } from "lucide-react";
 
 import { PromptTrayLogo } from "@/components/landing/prompttray-logo";
-import { Button } from "@/components/ui/button";
 import { CHROME_WEB_STORE_URL } from "@/lib/chrome-web-store";
 import { createClient } from "@/lib/supabase/server";
 
@@ -89,21 +91,12 @@ function formatRelativeTime(value: string) {
   return formatter.format(diffDays, "day");
 }
 
-function StatusDot({ active }: { active: boolean }) {
-  return (
-    <span
-      className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${
-        active ? "bg-emerald-500" : "bg-muted-foreground/35"
-      }`}
-    />
-  );
-}
-
 function getDashboardPlan(entitlement: EntitlementRow | null) {
   const isPremium =
     entitlement?.plan === "premium" &&
     entitlement?.status === "active" &&
-    (!entitlement.current_period_end || new Date(entitlement.current_period_end) > new Date());
+    (!entitlement.current_period_end ||
+      new Date(entitlement.current_period_end) > new Date());
 
   return isPremium ? "premium" : "free";
 }
@@ -125,9 +118,11 @@ function getDashboardPaywallState({
     };
   }
 
-  const atLimit = promptCount >= FREE_PROMPT_LIMIT || categoryCount >= FREE_CATEGORY_LIMIT;
+  const atLimit =
+    promptCount >= FREE_PROMPT_LIMIT || categoryCount >= FREE_CATEGORY_LIMIT;
   const nearLimit =
-    promptCount >= FREE_PROMPT_NEAR_LIMIT || categoryCount >= FREE_CATEGORY_NEAR_LIMIT;
+    promptCount >= FREE_PROMPT_NEAR_LIMIT ||
+    categoryCount >= FREE_CATEGORY_NEAR_LIMIT;
 
   if (atLimit) {
     return {
@@ -140,7 +135,7 @@ function getDashboardPaywallState({
   if (nearLimit) {
     return {
       body: "Upgrade before your prompt workflow hits the Free plan cap.",
-      headline: "You're close to the Free limit",
+      headline: "You're close to the limit",
       severity: "near" as const,
     };
   }
@@ -152,25 +147,12 @@ function getDashboardPaywallState({
   };
 }
 
-function renderPromptAvatar(prompt: PromptRow) {
-  if (prompt.avatar_type === "emoji" && prompt.avatar_emoji) {
-    return (
-      <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-border/80 bg-muted text-base">
-        {prompt.avatar_emoji}
-      </span>
-    );
-  }
-
-  if (prompt.avatar_type === "image" && prompt.avatar_image_path) {
-    return (
-      <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-border/80 bg-muted text-[10px] font-medium text-muted-foreground">
-        IMG
-      </span>
-    );
-  }
-
-  return null;
-}
+const AI_APPS = [
+  { label: "ChatGPT", href: "https://chatgpt.com/" },
+  { label: "Claude", href: "https://claude.ai/" },
+  { label: "Gemini", href: "https://gemini.google.com/app" },
+  { label: "Perplexity", href: "https://www.perplexity.ai/" },
+] as const;
 
 export default async function AppPage() {
   const supabase = await createClient();
@@ -187,43 +169,35 @@ export default async function AppPage() {
     { data: prompts, error: promptsError },
     { data: entitlement, error: entitlementError },
   ] = await Promise.all([
-      supabase
-        .from("categories")
-        .select("id, name")
-        .eq("user_id", user.id)
-        .order("name", { ascending: true }),
-      supabase
-        .from("prompts")
-        .select(
-          "id, title, content, created_at, avatar_type, avatar_emoji, avatar_image_path, category:categories!prompts_category_id_fkey(id, name)"
-        )
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("user_entitlements")
-        .select("plan, status, current_period_end")
-        .eq("user_id", user.id)
-        .maybeSingle(),
-    ]);
+    supabase
+      .from("categories")
+      .select("id, name")
+      .eq("user_id", user.id)
+      .order("name", { ascending: true }),
+    supabase
+      .from("prompts")
+      .select(
+        "id, title, content, created_at, avatar_type, avatar_emoji, avatar_image_path, category:categories!prompts_category_id_fkey(id, name)"
+      )
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("user_entitlements")
+      .select("plan, status, current_period_end")
+      .eq("user_id", user.id)
+      .maybeSingle(),
+  ]);
 
-  if (categoriesError) {
-    throw new Error(categoriesError.message);
-  }
-
-  if (promptsError) {
-    throw new Error(promptsError.message);
-  }
-
-  if (entitlementError) {
-    throw new Error(entitlementError.message);
-  }
+  if (categoriesError) throw new Error(categoriesError.message);
+  if (promptsError) throw new Error(promptsError.message);
+  if (entitlementError) throw new Error(entitlementError.message);
 
   const safeCategories = (categories ?? []) as CategoryRow[];
   const safePrompts = ((prompts ?? []) as PromptQueryRow[]).map((prompt) => ({
     ...prompt,
     category: prompt.category?.[0] ?? null,
   })) satisfies PromptRow[];
-  const hasPrompts = safePrompts.length > 0;
+
   const totalPrompts = safePrompts.length;
   const totalCategories = safeCategories.length;
   const plan = getDashboardPlan((entitlement ?? null) as EntitlementRow | null);
@@ -243,482 +217,444 @@ export default async function AppPage() {
   const recentPrompt = safePrompts[0] ?? null;
   const extensionConnected = true;
   const extensionInstalled = true;
-  const lastSync = recentPrompt ? formatRelativeTime(recentPrompt.created_at) : "No sync yet";
+  const lastSync = recentPrompt
+    ? formatRelativeTime(recentPrompt.created_at)
+    : "No sync yet";
+
+  const emailInitial = (user.email?.[0] ?? "U").toUpperCase();
+
+  const statusItems = [
+    {
+      label: "Status",
+      value: extensionConnected ? "Connected" : "Not connected",
+      dot: extensionConnected,
+    },
+    {
+      label: "Extension",
+      value: extensionInstalled ? "Installed" : "Not installed",
+      dot: extensionInstalled,
+    },
+    { label: "Last sync", value: lastSync, dot: false },
+    { label: "Plan", value: planLabel, dot: false },
+  ] as const;
 
   return (
     <main className="landing-page min-h-screen bg-[#f6f7fb] text-foreground">
       <PendingPlanRedirect />
-      <div className="border-b border-border/80 bg-background/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
-          <Link href="/" className="transition-opacity duration-200 hover:opacity-80">
-            <PromptTrayLogo className="h-6 text-foreground" />
+
+      {/* Header */}
+      <header className="border-b border-[#ebecef] bg-white">
+        <div className="mx-auto flex h-[72px] max-w-[1152px] items-center justify-between px-6">
+          <Link href="/" className="transition-opacity hover:opacity-80">
+            <PromptTrayLogo className="h-7 text-foreground" />
           </Link>
 
-          <div className="flex items-center gap-3">
-            <span className="landing-nav rounded-full bg-accent px-4 py-2 text-foreground">
-              Dashboard
-            </span>
-            <LogoutButton />
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-full border border-[#cfe4f3] bg-[#e0f2fe]">
+                <span className="text-[13px] font-medium tracking-[-0.076px] text-[#37759f]">
+                  {emailInitial}
+                </span>
+              </div>
+              <span className="text-[13px] font-medium tracking-[-0.076px] text-[#1d1d1f]">
+                {user.email}
+              </span>
+            </div>
+
+            <LogoutButton
+              variant="outline"
+              className="h-10 rounded-full border border-[#e6e7eb] px-4 text-[13px] font-medium text-[#1d1d1f]"
+            />
           </div>
         </div>
-      </div>
+      </header>
 
-      <div className="mx-auto max-w-6xl px-6 py-10 md:py-14">
-        <div className="space-y-8">
-          <section
-            id="account-overview"
-            className="rounded-[32px] border border-border/80 bg-card px-6 py-8 shadow-[0_28px_70px_-48px_rgba(15,23,42,0.24)] sm:px-8 sm:py-10"
-          >
-            <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-2xl">
-                <p className="landing-label text-muted-foreground">Account hub</p>
-                <h1
-                  className="mt-4 text-[44px] leading-[46px] tracking-[-0.01em] text-foreground md:text-[58px] md:leading-[60px]"
-                  style={{ fontFamily: "Instrument Serif, serif", fontWeight: 400 }}
-                >
-                  Welcome back
-                </h1>
-                <p className="landing-body mt-4 max-w-xl text-muted-foreground md:text-lg">
-                  PromptTray works inside ChatGPT, Claude, Gemini, and Perplexity — linked to{" "}
-                  {user.email ?? "your account"}.
-                </p>
-                <p className="landing-small mt-3 text-muted-foreground">
-                  Your account is on the {planLabel} plan. Use this dashboard for sync status and
-                  usage overview. Open any supported AI app to start using PromptTray.
-                </p>
-              </div>
+      {/* Body */}
+      <div className="mx-auto max-w-[1152px] px-6 py-14">
+        <div className="flex flex-col gap-8">
 
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
-                <div className="grid grid-cols-2 gap-2">
-                  <Button asChild className="landing-ui h-11 gap-1.5 px-4 text-sm">
-                    <a href="https://chatgpt.com/" target="_blank" rel="noreferrer">
-                      ChatGPT
-                      <ArrowUpRight className="h-3.5 w-3.5" />
+          {/* Hero card */}
+          <div className="flex gap-8 overflow-hidden rounded-[32px] border border-[#ebecef] bg-white p-8 shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-2px_rgba(0,0,0,0.05)]">
+            <div className="flex flex-1 flex-col gap-4">
+              <h1
+                className="text-[48px] leading-none text-black"
+                style={{ fontFamily: "Instrument Serif, serif", fontWeight: 400 }}
+              >
+                Welcome back
+              </h1>
+              <p className="text-[16px] leading-[26px] tracking-[0.034px] text-[#86868b]">
+                PromptTray works inside ChatGPT, Claude, Gemini, and Perplexity
+                — linked to{" "}
+                <span className="text-[#3b82f6]">{user.email}</span>
+              </p>
+            </div>
+
+            <div className="w-px self-stretch bg-[#ebecef]" />
+
+            <div className="flex flex-col items-end justify-between">
+              <a
+                href={CHROME_WEB_STORE_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="flex h-10 items-center gap-2.5 rounded-full bg-[#3b82f6] px-4 text-[13px] font-medium text-white transition-colors hover:bg-blue-600"
+              >
+                <Globe className="size-[22px]" />
+                Download Chrome Extension
+              </a>
+
+              <div className="flex items-center gap-6">
+                <p className="text-right text-[16px] leading-[26px] tracking-[0.034px] text-[#86868b]">
+                  Open any supported AI app to start using PromptTray:
+                </p>
+                <div className="flex gap-3">
+                  {AI_APPS.map(({ label, href }) => (
+                    <a
+                      key={label}
+                      href={href}
+                      target="_blank"
+                      rel="noreferrer"
+                      title={label}
+                      className="flex size-[46px] shrink-0 items-center justify-center rounded-full border border-[#e6e7eb] text-sm font-semibold text-[#1d1d1f] transition-colors hover:bg-[#f6f7fb]"
+                    >
+                      {label[0]}
                     </a>
-                  </Button>
-                  <Button asChild variant="outline" className="landing-ui h-11 gap-1.5 px-4 text-sm">
-                    <a href="https://claude.ai/" target="_blank" rel="noreferrer">
-                      Claude
-                      <ArrowUpRight className="h-3.5 w-3.5" />
-                    </a>
-                  </Button>
-                  <Button asChild variant="outline" className="landing-ui h-11 gap-1.5 px-4 text-sm">
-                    <a href="https://gemini.google.com/app" target="_blank" rel="noreferrer">
-                      Gemini
-                      <ArrowUpRight className="h-3.5 w-3.5" />
-                    </a>
-                  </Button>
-                  <Button asChild variant="outline" className="landing-ui h-11 gap-1.5 px-4 text-sm">
-                    <a href="https://www.perplexity.ai/" target="_blank" rel="noreferrer">
-                      Perplexity
-                      <ArrowUpRight className="h-3.5 w-3.5" />
-                    </a>
-                  </Button>
+                  ))}
                 </div>
-                {!extensionConnected ? (
-                  <Button asChild variant="outline" className="landing-ui h-11 px-5">
-                    <a href={CHROME_WEB_STORE_URL} target="_blank" rel="noreferrer">
-                      Install Extension
-                    </a>
-                  </Button>
-                ) : (
-                  <Button asChild variant="outline" className="landing-ui h-11 px-5">
-                    <Link href="/account">Manage Account</Link>
-                  </Button>
-                )}
               </div>
             </div>
-          </section>
+          </div>
 
-          <div className="grid gap-6 xl:grid-cols-[1.2fr_0.95fr]">
-            <div className="space-y-6">
-              <section
-                id="prompts-overview"
-                className="rounded-[28px] border border-border/80 bg-card p-6 shadow-[0_20px_50px_-42px_rgba(15,23,42,0.2)]"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
+          {/* Two-column grid */}
+          <div className="flex gap-6">
+
+            {/* Left column */}
+            <div className="flex flex-1 flex-col gap-6">
+
+              {/* Extension status */}
+              <section className="overflow-hidden rounded-[32px] border border-[#ebecef] bg-white px-8 py-7 shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_0px_rgba(0,0,0,0.06)]">
+                <div className="flex items-start justify-between gap-6">
+                  <div className="flex flex-1 flex-col gap-2">
                     <h2
-                      className="text-[30px] leading-[34px] tracking-[-0.01em] text-foreground"
+                      className="text-[32px] leading-none text-black"
                       style={{ fontFamily: "Instrument Serif, serif", fontWeight: 400 }}
                     >
                       Extension status
                     </h2>
-                    <p className="landing-body mt-2 text-muted-foreground">
-                      This dashboard is your account hub. Prompt creation and management happen
-                      inside any supported AI app through the PromptTray sidebar.
+                    <p className="text-[14px] leading-[22px] tracking-[0.034px] text-[#86868b]">
+                      This dashboard is your account hub. Prompt creation and
+                      management happen inside any supported AI app through the
+                      PromptTray sidebar.
                     </p>
                   </div>
-                  <div className="rounded-full bg-accent p-3 text-primary">
-                    <Puzzle className="h-5 w-5" />
+                  <div className="flex size-[46px] shrink-0 items-center justify-center rounded-full bg-[#f6f7fb]">
+                    <Puzzle className="size-[26px] text-[#1d1d1f]" />
                   </div>
                 </div>
 
-                <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-border bg-background px-4 py-4">
-                    <div className="flex items-start gap-3">
-                      <StatusDot active={extensionConnected} />
-                      <div>
-                        <p className="landing-label text-muted-foreground">Status</p>
-                        <p className="landing-h4 mt-1">
-                          {extensionConnected ? "Connected" : "Not connected"}
+                <div className="mt-7 grid grid-cols-2 gap-3">
+                  {statusItems.map(({ label, value, dot }) => (
+                    <div
+                      key={label}
+                      className="flex flex-col gap-2 rounded-2xl border border-[#e6e7eb] px-4 pb-3 pt-4"
+                    >
+                      <p className="text-[12px] font-medium tracking-[-0.076px] text-[#86868b]">
+                        {label}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-[16px] font-medium leading-[26px] tracking-[-0.076px] text-[#1d1d1f]">
+                          {value}
                         </p>
+                        {dot && (
+                          <span className="size-2 shrink-0 rounded-full bg-emerald-500" />
+                        )}
                       </div>
                     </div>
-                  </div>
-
-                  <div className="rounded-2xl border border-border bg-background px-4 py-4">
-                    <div className="flex items-start gap-3">
-                      <StatusDot active={extensionInstalled} />
-                      <div>
-                        <p className="landing-label text-muted-foreground">Extension</p>
-                        <p className="landing-h4 mt-1">
-                          {extensionInstalled ? "Installed" : "Not installed"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl border border-border bg-background px-4 py-4">
-                    <p className="landing-label text-muted-foreground">Last sync</p>
-                    <p className="landing-h4 mt-1">{lastSync}</p>
-                  </div>
-
-                  <div className="rounded-2xl border border-border bg-background px-4 py-4">
-                    <p className="landing-label text-muted-foreground">Plan</p>
-                    <p className="landing-h4 mt-1">{planLabel}</p>
-                    <p className="landing-small mt-1 text-muted-foreground">
-                      {isPremium ? "Unlimited library" : "Free limits active"}
-                    </p>
-                  </div>
+                  ))}
                 </div>
               </section>
 
+              {/* Plan card */}
               <section
-                id="plan-usage"
-                className={`rounded-[28px] border p-6 shadow-[0_20px_50px_-42px_rgba(15,23,42,0.2)] ${
-                  paywallState.severity === "premium"
-                    ? "border-emerald-200 bg-emerald-50/80"
-                    : paywallState.severity === "near" || paywallState.severity === "limit"
-                      ? "border-amber-200 bg-amber-50/85"
-                      : "border-border/80 bg-card"
+                className={`overflow-hidden rounded-[32px] border px-8 py-7 ${
+                  isPremium
+                    ? "border-[#1461fc] bg-white"
+                    : "border-[#ebecef] bg-white shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_0px_rgba(0,0,0,0.06)]"
                 }`}
               >
-                <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <div className="rounded-full bg-background/80 p-2 text-primary">
-                        <Sparkles className="h-4 w-4" />
-                      </div>
-                      <p className="landing-label text-muted-foreground">Plan & usage</p>
-                    </div>
+                <div className="flex items-start justify-between gap-6">
+                  <div className="flex flex-1 flex-col gap-2">
                     <h2
-                      className="mt-4 text-[30px] leading-[34px] tracking-[-0.01em] text-foreground"
+                      className={`text-[32px] leading-none ${isPremium ? "text-[#1461fc]" : "text-black"}`}
                       style={{ fontFamily: "Instrument Serif, serif", fontWeight: 400 }}
                     >
                       {paywallState.headline}
                     </h2>
-                    <p className="landing-body mt-2 max-w-xl text-muted-foreground">
+                    <p className="text-[14px] leading-[22px] tracking-[0.034px] text-[#86868b]">
                       {paywallState.body}
                     </p>
                   </div>
-
-                  {!isPremium ? (
-                    <Button asChild className="landing-ui h-11 shrink-0 gap-2 px-5">
-                      <Link href="/pricing">
-                        Upgrade
-                        <ArrowUpRight className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                  ) : (
-                    <span className="landing-label rounded-full bg-emerald-100 px-3 py-2 text-emerald-700">
-                      Premium active
-                    </span>
-                  )}
+                  <div
+                    className={`flex size-[46px] shrink-0 items-center justify-center rounded-full ${
+                      isPremium ? "bg-[#e0f2fe]" : "bg-[#f6f7fb]"
+                    }`}
+                  >
+                    <Sparkles className="size-[26px] text-[#1d1d1f]" />
+                  </div>
                 </div>
 
-                <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-border/70 bg-background/80 px-4 py-5">
-                    <p className="landing-label text-muted-foreground">Prompt usage</p>
-                    <p className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-foreground">
+                <div className="mt-7 flex gap-3">
+                  <div className="flex flex-1 flex-col gap-2 rounded-2xl border border-[#e6e7eb] px-4 pb-3 pt-4">
+                    <p className="text-[12px] font-medium tracking-[-0.076px] text-[#86868b]">
+                      Prompt usage
+                    </p>
+                    <p className="text-[16px] font-medium leading-[26px] tracking-[-0.076px] text-[#1d1d1f]">
                       {promptUsageLabel}
                     </p>
                   </div>
-
-                  <div className="rounded-2xl border border-border/70 bg-background/80 px-4 py-5">
-                    <p className="landing-label text-muted-foreground">Category usage</p>
-                    <p className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-foreground">
+                  <div className="flex flex-1 flex-col gap-2 rounded-2xl border border-[#e6e7eb] px-4 pb-3 pt-4">
+                    <p className="text-[12px] font-medium tracking-[-0.076px] text-[#86868b]">
+                      Category usage
+                    </p>
+                    <p className="text-[16px] font-medium leading-[26px] tracking-[-0.076px] text-[#1d1d1f]">
                       {categoryUsageLabel}
                     </p>
                   </div>
                 </div>
+
+                {!isPremium && (
+                  <Link
+                    href="/pricing"
+                    className="mt-3 flex h-10 w-full items-center justify-center rounded-full bg-[#3b82f6] text-[13px] font-medium text-white transition-colors hover:bg-blue-600"
+                  >
+                    Upgrade Plan
+                  </Link>
+                )}
               </section>
 
-              <section className="rounded-[28px] border border-border/80 bg-card p-6 shadow-[0_20px_50px_-42px_rgba(15,23,42,0.2)]">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
+              {/* Prompts overview */}
+              <section className="overflow-hidden rounded-[32px] border border-[#ebecef] bg-white px-8 py-7 shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_0px_rgba(0,0,0,0.06)]">
+                <div className="flex items-start justify-between gap-6">
+                  <div className="flex flex-1 flex-col gap-2">
                     <h2
-                      className="text-[30px] leading-[34px] tracking-[-0.01em] text-foreground"
+                      className="text-[32px] leading-none text-black"
                       style={{ fontFamily: "Instrument Serif, serif", fontWeight: 400 }}
                     >
                       Prompts overview
                     </h2>
-                    <p className="landing-body mt-2 text-muted-foreground">
-                      A read-only snapshot of the prompts already synced from your PromptTray
-                      sidebar across supported AI apps.
+                    <p className="text-[14px] leading-[22px] tracking-[0.034px] text-[#86868b]">
+                      A read-only snapshot of the prompts already synced from
+                      your PromptTray sidebar across supported AI apps.
                     </p>
                   </div>
-                  <div className="rounded-full bg-secondary p-3 text-foreground">
-                    <LayoutGrid className="h-5 w-5" />
+                  <div className="flex size-[46px] shrink-0 items-center justify-center rounded-full bg-[#f6f7fb]">
+                    <LayoutGrid className="size-[26px] text-[#1d1d1f]" />
                   </div>
                 </div>
 
-                <div className="mt-6 rounded-2xl border border-border bg-secondary/60 px-4 py-5">
-                  <p className="landing-label text-muted-foreground">Most recent</p>
-                  {recentPrompt ? (
-                    <div className="mt-3 flex items-start gap-3">
-                      {renderPromptAvatar(recentPrompt)}
-                      <p className="landing-body min-w-0 text-foreground">{recentPrompt.title}</p>
-                    </div>
-                  ) : (
-                    <p className="landing-body mt-3 text-foreground">No prompts saved yet</p>
-                  )}
-                </div>
-
-                {!hasPrompts ? (
-                  <div className="mt-6 rounded-2xl border border-dashed border-border bg-background px-5 py-6">
-                    <h3 className="landing-h4 text-base text-foreground">No synced prompts yet</h3>
-                    <p className="landing-body mt-2 max-w-2xl text-muted-foreground">
-                      Save your first prompt from the PromptTray sidebar in any supported AI app
-                      and your account overview will update here automatically.
+                <div className="mt-7 flex flex-col gap-3">
+                  <div className="flex min-h-[77px] flex-col justify-center gap-2 rounded-2xl bg-[#f6f7fb] px-4 pb-3 pt-4">
+                    <p className="text-[12px] font-medium tracking-[-0.076px] text-[#86868b]">
+                      Most recent
                     </p>
-                    <div className="mt-4 grid grid-cols-2 gap-2 sm:flex sm:flex-row">
-                      <Button asChild className="landing-ui h-11 gap-1.5 px-4 text-sm">
-                        <a href="https://chatgpt.com/" target="_blank" rel="noreferrer">
-                          ChatGPT <ArrowUpRight className="h-3.5 w-3.5" />
-                        </a>
-                      </Button>
-                      <Button asChild variant="outline" className="landing-ui h-11 gap-1.5 px-4 text-sm">
-                        <a href="https://claude.ai/" target="_blank" rel="noreferrer">
-                          Claude <ArrowUpRight className="h-3.5 w-3.5" />
-                        </a>
-                      </Button>
-                      <Button asChild variant="outline" className="landing-ui h-11 gap-1.5 px-4 text-sm">
-                        <a href="https://gemini.google.com/app" target="_blank" rel="noreferrer">
-                          Gemini <ArrowUpRight className="h-3.5 w-3.5" />
-                        </a>
-                      </Button>
-                      <Button asChild variant="outline" className="landing-ui h-11 gap-1.5 px-4 text-sm">
-                        <a href="https://www.perplexity.ai/" target="_blank" rel="noreferrer">
-                          Perplexity <ArrowUpRight className="h-3.5 w-3.5" />
-                        </a>
-                      </Button>
-                    </div>
+                    <p className="text-[16px] font-medium leading-[26px] tracking-[-0.076px] text-[#1d1d1f]">
+                      {recentPrompt?.title ?? "No prompts saved yet"}
+                    </p>
                   </div>
-                ) : (
-                  <div className="mt-6 rounded-2xl border border-border bg-background px-5 py-5">
-                    <p className="landing-label text-muted-foreground">Latest sync preview</p>
-                    <div className="mt-3 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                      <div className="flex min-w-0 items-start gap-3">
-                        {recentPrompt ? renderPromptAvatar(recentPrompt) : null}
-                        <div className="min-w-0">
-                          <h3 className="landing-h4 text-base text-foreground">{recentPrompt?.title}</h3>
-                          <p className="landing-body mt-2 max-w-2xl text-muted-foreground">
-                            {recentPrompt
-                              ? recentPrompt.content.length > 160
-                                ? `${recentPrompt.content.slice(0, 160)}...`
-                                : recentPrompt.content
-                              : "No prompts saved yet"}
+
+                  <div className="flex flex-col gap-2 rounded-2xl border border-[#e6e7eb] px-4 pb-3 pt-4">
+                    <p className="text-[12px] font-medium tracking-[-0.076px] text-[#86868b]">
+                      Latest sync preview
+                    </p>
+                    {recentPrompt ? (
+                      <>
+                        <div className="flex items-center justify-between gap-4">
+                          <p className="text-[16px] font-medium leading-[26px] tracking-[-0.076px] text-[#1d1d1f]">
+                            {recentPrompt.title}
+                          </p>
+                          <p className="shrink-0 text-[12px] font-medium tracking-[-0.076px] text-[#86868b]">
+                            Updated {formatRelativeTime(recentPrompt.created_at)}
                           </p>
                         </div>
-                      </div>
-
-                      <div className="flex flex-col items-start gap-2 md:items-end">
-                        {recentPrompt?.category ? (
-                          <span className="landing-label rounded-full bg-accent px-3 py-1.5 text-accent-foreground">
-                            {recentPrompt.category.name}
-                          </span>
-                        ) : null}
-                        <p className="landing-small text-muted-foreground">
-                          Updated {recentPrompt ? formatRelativeTime(recentPrompt.created_at) : "Recently"}
+                        <p className="text-[14px] leading-[22px] tracking-[0.034px] text-[#86868b]">
+                          {recentPrompt.content.length > 160
+                            ? `${recentPrompt.content.slice(0, 160)}...`
+                            : recentPrompt.content}
                         </p>
-                      </div>
-                    </div>
+                      </>
+                    ) : (
+                      <p className="text-[16px] font-medium leading-[26px] tracking-[-0.076px] text-[#1d1d1f]">
+                        No synced prompts yet
+                      </p>
+                    )}
                   </div>
-                )}
+                </div>
               </section>
             </div>
 
-            <div className="space-y-6">
-              <section className="rounded-[28px] border border-border/80 bg-card p-6 shadow-[0_20px_50px_-42px_rgba(15,23,42,0.2)]">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
+            {/* Right column */}
+            <div className="flex flex-1 flex-col gap-6">
+
+              {/* Quick actions */}
+              <section className="overflow-hidden rounded-[32px] border border-[#ebecef] bg-white px-8 py-7 shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_0px_rgba(0,0,0,0.06)]">
+                <div className="flex items-start justify-between gap-6">
+                  <div className="flex flex-1 flex-col gap-2">
                     <h2
-                      className="text-[30px] leading-[34px] tracking-[-0.01em] text-foreground"
+                      className="text-[32px] leading-none text-black"
                       style={{ fontFamily: "Instrument Serif, serif", fontWeight: 400 }}
                     >
                       Quick actions
                     </h2>
-                    <p className="landing-body mt-2 text-muted-foreground">
+                    <p className="text-[14px] leading-[22px] tracking-[0.034px] text-[#86868b]">
                       Open a supported AI app or manage your account.
                     </p>
                   </div>
-                  <div className="rounded-full bg-secondary p-3 text-foreground">
-                    <LayoutGrid className="h-5 w-5" />
+                  <div className="flex size-[46px] shrink-0 items-center justify-center rounded-full bg-[#f6f7fb]">
+                    <Zap className="size-[26px] text-[#1d1d1f]" />
                   </div>
                 </div>
 
-                <div className="mt-6 grid gap-3">
-                  <div className="rounded-2xl border border-border bg-background px-4 py-4">
-                    <div className="flex items-start gap-3">
-                      <div className="rounded-xl bg-accent p-2.5 text-primary">
-                        <Puzzle className="h-4 w-4" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="landing-h4 text-base">Open a supported app</p>
-                        <p className="landing-small mt-1 text-muted-foreground">
-                          Use PromptTray inside any of the supported AI services.
-                        </p>
-                        <div className="mt-3 grid grid-cols-2 gap-2">
-                          <a
-                            href="https://chatgpt.com/"
-                            target="_blank"
-                            rel="noreferrer"
-                            className="flex items-center justify-between rounded-xl border border-border bg-accent/60 px-3 py-2.5 text-sm font-medium text-foreground transition-[background-color,border-color] duration-150 hover:border-foreground/15 hover:bg-accent"
-                          >
-                            ChatGPT
-                            <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground" />
-                          </a>
-                          <a
-                            href="https://claude.ai/"
-                            target="_blank"
-                            rel="noreferrer"
-                            className="flex items-center justify-between rounded-xl border border-border bg-accent/60 px-3 py-2.5 text-sm font-medium text-foreground transition-[background-color,border-color] duration-150 hover:border-foreground/15 hover:bg-accent"
-                          >
-                            Claude
-                            <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground" />
-                          </a>
-                          <a
-                            href="https://gemini.google.com/app"
-                            target="_blank"
-                            rel="noreferrer"
-                            className="flex items-center justify-between rounded-xl border border-border bg-accent/60 px-3 py-2.5 text-sm font-medium text-foreground transition-[background-color,border-color] duration-150 hover:border-foreground/15 hover:bg-accent"
-                          >
-                            Gemini
-                            <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground" />
-                          </a>
-                          <a
-                            href="https://www.perplexity.ai/"
-                            target="_blank"
-                            rel="noreferrer"
-                            className="flex items-center justify-between rounded-xl border border-border bg-accent/60 px-3 py-2.5 text-sm font-medium text-foreground transition-[background-color,border-color] duration-150 hover:border-foreground/15 hover:bg-accent"
-                          >
-                            Perplexity
-                            <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground" />
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                <div className="my-7 h-px bg-[#ebecef]" />
 
-                  <Link
-                    href="/account"
-                    className="group flex items-center justify-between rounded-2xl border border-border bg-background px-4 py-4 text-left transition-[transform,box-shadow,border-color,background-color] duration-200 ease-out hover:-translate-y-0.5 hover:border-foreground/12 hover:shadow-[0_18px_34px_-28px_rgba(15,23,42,0.24)]"
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="rounded-xl bg-accent p-2.5 text-primary transition-colors duration-200 group-hover:bg-primary group-hover:text-white">
-                        <UserRound className="h-4 w-4" />
+                <div className="flex justify-center gap-2 px-8">
+                  {AI_APPS.map(({ label, href }) => (
+                    <a
+                      key={label}
+                      href={href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex flex-1 flex-col items-center gap-2"
+                    >
+                      <div className="flex size-[60px] items-center justify-center rounded-full border border-[#e6e7eb] text-base font-semibold text-[#1d1d1f] transition-colors hover:bg-[#f6f7fb]">
+                        {label[0]}
                       </div>
-                      <div>
-                        <p className="landing-h4 text-base">Manage account</p>
-                        <p className="landing-small mt-1 text-muted-foreground">
-                          Review your account details, connection status, and sign-out settings.
-                        </p>
-                      </div>
-                    </div>
-                    <ArrowUpRight className="h-4 w-4 text-muted-foreground transition-colors duration-200 group-hover:text-foreground" />
-                  </Link>
-
-                  <Link
-                    href="/support"
-                    className="group flex items-center justify-between rounded-2xl border border-border bg-background px-4 py-4 text-left transition-[transform,box-shadow,border-color,background-color] duration-200 ease-out hover:-translate-y-0.5 hover:border-foreground/12 hover:shadow-[0_18px_34px_-28px_rgba(15,23,42,0.24)]"
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="rounded-xl bg-accent p-2.5 text-primary transition-colors duration-200 group-hover:bg-primary group-hover:text-white">
-                        <LifeBuoy className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <p className="landing-h4 text-base">Help</p>
-                        <p className="landing-small mt-1 text-muted-foreground">
-                          Get setup guidance, troubleshooting help, and support details.
-                        </p>
-                      </div>
-                    </div>
-                    <ArrowUpRight className="h-4 w-4 text-muted-foreground transition-colors duration-200 group-hover:text-foreground" />
-                  </Link>
+                      <p className="text-[14px] font-medium leading-[22px] tracking-[0.034px] text-black">
+                        {label}
+                      </p>
+                    </a>
+                  ))}
                 </div>
-              </section>
 
-              <section className="rounded-[28px] bg-foreground p-6 text-background shadow-[0_28px_70px_-42px_rgba(15,23,42,0.34)]">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10">
-                  <CheckCircle2 className="h-5 w-5" />
-                </div>
-                <h2
-                  className="mt-5 text-[30px] leading-[34px] tracking-[-0.01em]"
-                  style={{ fontFamily: "Instrument Serif, serif", fontWeight: 400 }}
+                <div className="my-7 h-px bg-[#ebecef]" />
+
+                <Link
+                  href="/account"
+                  className="flex items-center gap-4 transition-opacity hover:opacity-80"
                 >
-                  Your prompts stay with you
-                </h2>
-                <p className="landing-body mt-4 max-w-md text-background/75">
-                  Saved prompts stay connected to your account across all supported AI apps.
-                  Reinstalling the extension does not remove what is already synced to PromptTray.
-                </p>
+                  <div className="flex flex-1 flex-col gap-0.5">
+                    <p className="text-[16px] font-medium leading-[26px] tracking-[0.034px] text-black">
+                      Manage your account
+                    </p>
+                    <p className="text-[14px] leading-[22px] tracking-[0.034px] text-[#86868b]">
+                      Check your account details, connection status, and
+                      sign-out options.
+                    </p>
+                  </div>
+                  <ChevronRight className="size-[22px] shrink-0 text-[#1d1d1f]" />
+                </Link>
+
+                <div className="my-7 h-px bg-[#ebecef]" />
+
+                <Link
+                  href="/support"
+                  className="flex items-center gap-4 transition-opacity hover:opacity-80"
+                >
+                  <div className="flex flex-1 flex-col gap-0.5">
+                    <p className="text-[16px] font-medium leading-[26px] tracking-[0.034px] text-black">
+                      Help
+                    </p>
+                    <p className="text-[14px] leading-[22px] tracking-[0.034px] text-[#86868b]">
+                      Get setup guidance, troubleshooting help, and support
+                      details.
+                    </p>
+                  </div>
+                  <ChevronRight className="size-[22px] shrink-0 text-[#1d1d1f]" />
+                </Link>
               </section>
 
-              <section
-                id="extension-setup"
-                className="rounded-[28px] border border-border/80 bg-card p-6 shadow-[0_20px_50px_-42px_rgba(15,23,42,0.2)]"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
+              {/* Your prompts stay with you */}
+              <section className="overflow-hidden rounded-[32px] bg-[#333] px-8 py-7 shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_0px_rgba(0,0,0,0.06)]">
+                <div className="flex items-start justify-between gap-6">
+                  <div className="flex flex-1 flex-col gap-2">
                     <h2
-                      className="text-[30px] leading-[34px] tracking-[-0.01em] text-foreground"
+                      className="text-[32px] leading-none text-white"
+                      style={{ fontFamily: "Instrument Serif, serif", fontWeight: 400 }}
+                    >
+                      Your prompts stay with you
+                    </h2>
+                    <p className="text-[14px] leading-[22px] tracking-[0.034px] text-[#cccccc]">
+                      Saved prompts stay connected to your account across all
+                      supported AI apps. Reinstalling the extension does not
+                      remove what is already synced to PromptTray.
+                    </p>
+                  </div>
+                  <div className="flex size-[46px] shrink-0 items-center justify-center rounded-full bg-[#474747]">
+                    <ShieldCheck className="size-[26px] text-white" />
+                  </div>
+                </div>
+              </section>
+
+              {/* Install extension */}
+              <section className="overflow-hidden rounded-[32px] border border-[#ebecef] bg-white px-8 py-7 shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_0px_rgba(0,0,0,0.06)]">
+                <div className="flex items-start justify-between gap-6">
+                  <div className="flex flex-1 flex-col gap-2">
+                    <h2
+                      className="text-[32px] leading-none text-black"
                       style={{ fontFamily: "Instrument Serif, serif", fontWeight: 400 }}
                     >
                       Install extension
                     </h2>
-                    <p className="landing-body mt-2 text-muted-foreground">
-                      PromptTray runs inside ChatGPT, Claude, Gemini, and Perplexity. Install it
-                      from the Chrome Web Store to save prompts and have them appear in your
-                      account overview.
+                    <p className="text-[14px] leading-[22px] tracking-[0.034px] text-[#86868b]">
+                      PromptTray works with ChatGPT, Claude, Gemini, and
+                      Perplexity. Get it from the Chrome Web Store to manage
+                      your prompts.
                     </p>
                   </div>
-                  <div className="rounded-full bg-accent p-3 text-primary">
-                    <Download className="h-5 w-5" />
+                  <div className="flex size-[46px] shrink-0 items-center justify-center rounded-full bg-[#f6f7fb]">
+                    <CloudDownload className="size-[26px] text-[#1d1d1f]" />
                   </div>
                 </div>
 
-                <ol className="landing-body mt-6 grid gap-3 text-muted-foreground">
-                  <li className="rounded-2xl border border-border bg-background px-4 py-3">
-                    Open the{" "}
-                    <a
-                      href={CHROME_WEB_STORE_URL}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="font-medium text-foreground underline underline-offset-4 transition-colors duration-200 hover:text-primary"
-                    >
-                      Chrome Web Store listing
-                    </a>
-                    .
-                  </li>
-                  <li className="rounded-2xl border border-border bg-background px-4 py-3">
-                    Click <span className="font-medium text-foreground">Add to Chrome</span>.
-                  </li>
-                  <li className="rounded-2xl border border-border bg-background px-4 py-3">
-                    Open ChatGPT, Claude, Gemini, or Perplexity and use PromptTray to start saving
-                    prompts.
-                  </li>
-                </ol>
+                <div className="mt-7 flex flex-col gap-3">
+                  <div className="flex flex-col gap-4 rounded-2xl border border-[#e6e7eb] p-4">
+                    <div className="flex size-[22px] items-center justify-center rounded-full bg-[#1d1d1f]">
+                      <span className="text-[12px] font-medium text-white">1</span>
+                    </div>
+                    <p className="text-[16px] font-medium leading-[26px] tracking-[-0.076px] text-[#1d1d1f]">
+                      <span className="font-normal text-[#86868b]">Open the </span>
+                      <a
+                        href={CHROME_WEB_STORE_URL}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="underline decoration-solid"
+                      >
+                        Chrome Web Store listing.
+                      </a>
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-4 rounded-2xl border border-[#e6e7eb] p-4">
+                    <div className="flex size-[22px] items-center justify-center rounded-full bg-[#1d1d1f]">
+                      <span className="text-[12px] font-medium text-white">2</span>
+                    </div>
+                    <p className="text-[16px] font-medium leading-[26px] tracking-[-0.076px] text-[#1d1d1f]">
+                      <span className="font-normal text-[#86868b]">Click </span>
+                      Add to Chrome{" "}
+                      <span className="font-normal text-[#86868b]">
+                        and login to account.
+                      </span>
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-4 rounded-2xl border border-[#e6e7eb] p-4">
+                    <div className="flex size-[22px] items-center justify-center rounded-full bg-[#1d1d1f]">
+                      <span className="text-[12px] font-medium text-white">3</span>
+                    </div>
+                    <p className="font-normal text-[16px] leading-[26px] tracking-[-0.076px] text-[#86868b]">
+                      Open ChatGPT, Claude, Gemini, or Perplexity and use
+                      PromptTray to start saving prompts.
+                    </p>
+                  </div>
+                </div>
               </section>
             </div>
           </div>

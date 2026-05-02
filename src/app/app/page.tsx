@@ -148,10 +148,10 @@ function getDashboardPaywallState({
 }
 
 const AI_APPS = [
-  { label: "ChatGPT", href: "https://chatgpt.com/" },
-  { label: "Claude", href: "https://claude.ai/" },
-  { label: "Gemini", href: "https://gemini.google.com/app" },
-  { label: "Perplexity", href: "https://www.perplexity.ai/" },
+  { label: "ChatGPT", href: "https://chatgpt.com/", icon: "/icons/chatgpt.svg" },
+  { label: "Claude", href: "https://claude.ai/", icon: "/icons/claude.svg" },
+  { label: "Gemini", href: "https://gemini.google.com/app", icon: "/icons/gemini.png" },
+  { label: "Perplexity", href: "https://www.perplexity.ai/", icon: "/icons/perplexity.svg" },
 ] as const;
 
 export default async function AppPage() {
@@ -307,16 +307,16 @@ export default async function AppPage() {
                   Open any supported AI app to start using PromptTray:
                 </p>
                 <div className="flex gap-3">
-                  {AI_APPS.map(({ label, href }) => (
+                  {AI_APPS.map(({ label, href, icon }) => (
                     <a
                       key={label}
                       href={href}
                       target="_blank"
                       rel="noreferrer"
                       title={label}
-                      className="flex size-[46px] shrink-0 items-center justify-center rounded-full border border-[#e6e7eb] text-sm font-semibold text-[#1d1d1f] transition-colors hover:bg-[#f6f7fb]"
+                      className="flex size-[46px] shrink-0 items-center justify-center rounded-full border border-[#e6e7eb] transition-colors hover:bg-[#f6f7fb]"
                     >
-                      {label[0]}
+                      <img src={icon} alt={label} className="size-[28px] object-contain" />
                     </a>
                   ))}
                 </div>
@@ -516,7 +516,7 @@ export default async function AppPage() {
                 <div className="my-7 h-px bg-[#ebecef]" />
 
                 <div className="flex justify-center gap-2 px-8">
-                  {AI_APPS.map(({ label, href }) => (
+                  {AI_APPS.map(({ label, href, icon }) => (
                     <a
                       key={label}
                       href={href}
@@ -524,8 +524,8 @@ export default async function AppPage() {
                       rel="noreferrer"
                       className="flex flex-1 flex-col items-center gap-2"
                     >
-                      <div className="flex size-[60px] items-center justify-center rounded-full border border-[#e6e7eb] text-base font-semibold text-[#1d1d1f] transition-colors hover:bg-[#f6f7fb]">
-                        {label[0]}
+                      <div className="flex size-[60px] items-center justify-center rounded-full border border-[#e6e7eb] transition-colors hover:bg-[#f6f7fb]">
+                        <img src={icon} alt={label} className="size-[36px] object-contain" />
                       </div>
                       <p className="text-[14px] font-medium leading-[22px] tracking-[0.034px] text-black">
                         {label}

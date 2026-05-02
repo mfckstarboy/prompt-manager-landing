@@ -279,30 +279,50 @@ export default async function AppPage() {
                   Welcome back
                 </h1>
                 <p className="landing-body mt-4 max-w-xl text-muted-foreground md:text-lg">
-                  PromptTray works inside ChatGPT through the extension sidebar and stays linked to{" "}
+                  PromptTray works inside ChatGPT, Claude, Gemini, and Perplexity — linked to{" "}
                   {user.email ?? "your account"}.
                 </p>
                 <p className="landing-small mt-3 text-muted-foreground">
                   Your account is on the {planLabel} plan. Use this dashboard for sync status and
-                  usage while ChatGPT stays your main workspace for prompts.
+                  usage overview. Open any supported AI app to start using PromptTray.
                 </p>
               </div>
 
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <Button asChild className="landing-ui h-12 gap-2 px-6">
-                  <a href="https://chatgpt.com/" target="_blank" rel="noreferrer">
-                    Open Extension
-                    <ArrowUpRight className="h-4 w-4" />
-                  </a>
-                </Button>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+                <div className="grid grid-cols-2 gap-2">
+                  <Button asChild className="landing-ui h-11 gap-1.5 px-4 text-sm">
+                    <a href="https://chatgpt.com/" target="_blank" rel="noreferrer">
+                      ChatGPT
+                      <ArrowUpRight className="h-3.5 w-3.5" />
+                    </a>
+                  </Button>
+                  <Button asChild variant="outline" className="landing-ui h-11 gap-1.5 px-4 text-sm">
+                    <a href="https://claude.ai/" target="_blank" rel="noreferrer">
+                      Claude
+                      <ArrowUpRight className="h-3.5 w-3.5" />
+                    </a>
+                  </Button>
+                  <Button asChild variant="outline" className="landing-ui h-11 gap-1.5 px-4 text-sm">
+                    <a href="https://gemini.google.com/app" target="_blank" rel="noreferrer">
+                      Gemini
+                      <ArrowUpRight className="h-3.5 w-3.5" />
+                    </a>
+                  </Button>
+                  <Button asChild variant="outline" className="landing-ui h-11 gap-1.5 px-4 text-sm">
+                    <a href="https://www.perplexity.ai/" target="_blank" rel="noreferrer">
+                      Perplexity
+                      <ArrowUpRight className="h-3.5 w-3.5" />
+                    </a>
+                  </Button>
+                </div>
                 {!extensionConnected ? (
-                  <Button asChild variant="outline" className="landing-ui h-12 px-6">
+                  <Button asChild variant="outline" className="landing-ui h-11 px-5">
                     <a href={CHROME_WEB_STORE_URL} target="_blank" rel="noreferrer">
                       Install Extension
                     </a>
                   </Button>
                 ) : (
-                  <Button asChild variant="outline" className="landing-ui h-12 px-6">
+                  <Button asChild variant="outline" className="landing-ui h-11 px-5">
                     <Link href="/account">Manage Account</Link>
                   </Button>
                 )}
@@ -326,7 +346,7 @@ export default async function AppPage() {
                     </h2>
                     <p className="landing-body mt-2 text-muted-foreground">
                       This dashboard is your account hub. Prompt creation and management happen
-                      inside ChatGPT through the PromptTray sidebar.
+                      inside any supported AI app through the PromptTray sidebar.
                     </p>
                   </div>
                   <div className="rounded-full bg-accent p-3 text-primary">
@@ -445,7 +465,7 @@ export default async function AppPage() {
                     </h2>
                     <p className="landing-body mt-2 text-muted-foreground">
                       A read-only snapshot of the prompts already synced from your PromptTray
-                      sidebar in ChatGPT.
+                      sidebar across supported AI apps.
                     </p>
                   </div>
                   <div className="rounded-full bg-secondary p-3 text-foreground">
@@ -469,19 +489,28 @@ export default async function AppPage() {
                   <div className="mt-6 rounded-2xl border border-dashed border-border bg-background px-5 py-6">
                     <h3 className="landing-h4 text-base text-foreground">No synced prompts yet</h3>
                     <p className="landing-body mt-2 max-w-2xl text-muted-foreground">
-                      Save your first prompt from the PromptTray sidebar in ChatGPT and your
-                      account overview will update here automatically.
+                      Save your first prompt from the PromptTray sidebar in any supported AI app
+                      and your account overview will update here automatically.
                     </p>
-                    <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-                      <Button asChild className="landing-ui h-11 gap-2 px-5">
+                    <div className="mt-4 grid grid-cols-2 gap-2 sm:flex sm:flex-row">
+                      <Button asChild className="landing-ui h-11 gap-1.5 px-4 text-sm">
                         <a href="https://chatgpt.com/" target="_blank" rel="noreferrer">
-                          Open Extension
-                          <ArrowUpRight className="h-4 w-4" />
+                          ChatGPT <ArrowUpRight className="h-3.5 w-3.5" />
                         </a>
                       </Button>
-                      <Button asChild variant="outline" className="landing-ui h-11 px-5">
-                        <a href={CHROME_WEB_STORE_URL} target="_blank" rel="noreferrer">
-                          Install Extension
+                      <Button asChild variant="outline" className="landing-ui h-11 gap-1.5 px-4 text-sm">
+                        <a href="https://claude.ai/" target="_blank" rel="noreferrer">
+                          Claude <ArrowUpRight className="h-3.5 w-3.5" />
+                        </a>
+                      </Button>
+                      <Button asChild variant="outline" className="landing-ui h-11 gap-1.5 px-4 text-sm">
+                        <a href="https://gemini.google.com/app" target="_blank" rel="noreferrer">
+                          Gemini <ArrowUpRight className="h-3.5 w-3.5" />
+                        </a>
+                      </Button>
+                      <Button asChild variant="outline" className="landing-ui h-11 gap-1.5 px-4 text-sm">
+                        <a href="https://www.perplexity.ai/" target="_blank" rel="noreferrer">
+                          Perplexity <ArrowUpRight className="h-3.5 w-3.5" />
                         </a>
                       </Button>
                     </div>
@@ -531,7 +560,7 @@ export default async function AppPage() {
                       Quick actions
                     </h2>
                     <p className="landing-body mt-2 text-muted-foreground">
-                      Shortcuts for the account side while PromptTray stays focused inside ChatGPT.
+                      Open a supported AI app or manage your account.
                     </p>
                   </div>
                   <div className="rounded-full bg-secondary p-3 text-foreground">
@@ -540,25 +569,57 @@ export default async function AppPage() {
                 </div>
 
                 <div className="mt-6 grid gap-3">
-                  <Link
-                    href="https://chatgpt.com/"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="group flex items-center justify-between rounded-2xl border border-border bg-background px-4 py-4 text-left transition-[transform,box-shadow,border-color,background-color] duration-200 ease-out hover:-translate-y-0.5 hover:border-foreground/12 hover:shadow-[0_18px_34px_-28px_rgba(15,23,42,0.24)]"
-                  >
+                  <div className="rounded-2xl border border-border bg-background px-4 py-4">
                     <div className="flex items-start gap-3">
-                      <div className="rounded-xl bg-accent p-2.5 text-primary transition-colors duration-200 group-hover:bg-primary group-hover:text-white">
+                      <div className="rounded-xl bg-accent p-2.5 text-primary">
                         <Puzzle className="h-4 w-4" />
                       </div>
-                      <div>
-                        <p className="landing-h4 text-base">Open extension</p>
+                      <div className="min-w-0 flex-1">
+                        <p className="landing-h4 text-base">Open a supported app</p>
                         <p className="landing-small mt-1 text-muted-foreground">
-                          Launch ChatGPT and use PromptTray where prompts are actually created.
+                          Use PromptTray inside any of the supported AI services.
                         </p>
+                        <div className="mt-3 grid grid-cols-2 gap-2">
+                          <a
+                            href="https://chatgpt.com/"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center justify-between rounded-xl border border-border bg-accent/60 px-3 py-2.5 text-sm font-medium text-foreground transition-[background-color,border-color] duration-150 hover:border-foreground/15 hover:bg-accent"
+                          >
+                            ChatGPT
+                            <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground" />
+                          </a>
+                          <a
+                            href="https://claude.ai/"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center justify-between rounded-xl border border-border bg-accent/60 px-3 py-2.5 text-sm font-medium text-foreground transition-[background-color,border-color] duration-150 hover:border-foreground/15 hover:bg-accent"
+                          >
+                            Claude
+                            <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground" />
+                          </a>
+                          <a
+                            href="https://gemini.google.com/app"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center justify-between rounded-xl border border-border bg-accent/60 px-3 py-2.5 text-sm font-medium text-foreground transition-[background-color,border-color] duration-150 hover:border-foreground/15 hover:bg-accent"
+                          >
+                            Gemini
+                            <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground" />
+                          </a>
+                          <a
+                            href="https://www.perplexity.ai/"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center justify-between rounded-xl border border-border bg-accent/60 px-3 py-2.5 text-sm font-medium text-foreground transition-[background-color,border-color] duration-150 hover:border-foreground/15 hover:bg-accent"
+                          >
+                            Perplexity
+                            <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground" />
+                          </a>
                         </div>
+                      </div>
                     </div>
-                    <ArrowUpRight className="h-4 w-4 text-muted-foreground transition-colors duration-200 group-hover:text-foreground" />
-                  </Link>
+                  </div>
 
                   <Link
                     href="/account"
@@ -609,7 +670,7 @@ export default async function AppPage() {
                   Your prompts stay with you
                 </h2>
                 <p className="landing-body mt-4 max-w-md text-background/75">
-                  Saved prompts stay connected to your account while ChatGPT remains your workspace.
+                  Saved prompts stay connected to your account across all supported AI apps.
                   Reinstalling the extension does not remove what is already synced to PromptTray.
                 </p>
               </section>
@@ -627,8 +688,9 @@ export default async function AppPage() {
                       Install extension
                     </h2>
                     <p className="landing-body mt-2 text-muted-foreground">
-                      PromptTray runs inside ChatGPT. Install it from the Chrome Web Store to save
-                      new prompts and have them appear in your account overview.
+                      PromptTray runs inside ChatGPT, Claude, Gemini, and Perplexity. Install it
+                      from the Chrome Web Store to save prompts and have them appear in your
+                      account overview.
                     </p>
                   </div>
                   <div className="rounded-full bg-accent p-3 text-primary">
@@ -653,7 +715,8 @@ export default async function AppPage() {
                     Click <span className="font-medium text-foreground">Add to Chrome</span>.
                   </li>
                   <li className="rounded-2xl border border-border bg-background px-4 py-3">
-                    Open ChatGPT and use PromptTray to start saving prompts.
+                    Open ChatGPT, Claude, Gemini, or Perplexity and use PromptTray to start saving
+                    prompts.
                   </li>
                 </ol>
               </section>

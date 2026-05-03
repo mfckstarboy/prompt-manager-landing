@@ -17,7 +17,7 @@ function isPremiumEntitlement(entitlement: {
   if (!entitlement) return false;
   return (
     entitlement.plan === "premium" &&
-    entitlement.status === "active" &&
+    (entitlement.status === "active" || entitlement.status === "canceled") &&
     (!entitlement.current_period_end || new Date(entitlement.current_period_end) > new Date())
   );
 }

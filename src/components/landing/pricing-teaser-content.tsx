@@ -23,21 +23,56 @@ const PREMIUM_HIGHLIGHTS = [
   "Priority support",
 ];
 
+export type PlanInfo = {
+  plan: "free" | "premium";
+  status: "active" | "inactive" | "past_due" | "canceled" | "expired";
+  periodEnd: string | null;
+};
+
 type BillingPeriod = "monthly" | "yearly";
 
 interface Props {
-  userPlan: "free" | "premium" | null;
+  planInfo: PlanInfo | null;
 }
 
-export function PricingTeaserContent({ userPlan }: Props) {
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function isPremiumActive(info: PlanInfo): boolean {
+  return (
+    info.plan === "premium" &&
+    (info.status === "active" || info.status === "past_due") &&
+    (!info.periodEnd || new Date(info.periodEnd) > new Date())
+  );
+}
+
+function isPremiumCanceled(info: PlanInfo): boolean {
+  return (
+    info.plan === "premium" &&
+    info.status === "canceled" &&
+    info.periodEnd !== null &&
+    new Date(info.periodEnd) > new Date()
+  );
+}
+
+export function PricingTeaserContent({ planInfo }: Props) {
   const [billing, setBilling] = useState<BillingPeriod>("monthly");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isUpgradeLoading, setIsUpgradeLoading] = useState(false);
+  const [isReactivateLoading, setIsReactivateLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const isYearly = billing === "yearly";
 
+  const premiumActive = planInfo ? isPremiumActive(planInfo) : false;
+  const premiumCanceled = planInfo ? isPremiumCanceled(planInfo) : false;
+
   async function handleUpgrade() {
     setError(null);
-    setIsLoading(true);
+    setIsUpgradeLoading(true);
     try {
       const response = await fetch("/api/checkout/create-session", {
         method: "POST",
@@ -52,7 +87,23 @@ export function PricingTeaserContent({ userPlan }: Props) {
       window.location.href = url;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
-      setIsLoading(false);
+      setIsUpgradeLoading(false);
+    }
+  }
+
+  async function handleReactivate() {
+    setError(null);
+    setIsReactivateLoading(true);
+    try {
+      const response = await fetch("/api/subscription/reactivate", { method: "POST" });
+      if (!response.ok) {
+        const data = (await response.json()) as { error?: string };
+        throw new Error(data.error ?? "Unable to reactivate subscription.");
+      }
+      window.location.reload();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      setIsReactivateLoading(false);
     }
   }
 
@@ -99,7 +150,7 @@ export function PricingTeaserContent({ userPlan }: Props) {
             <div className="flex h-full flex-col rounded-[28px] border border-border/80 bg-card p-8 shadow-[0_20px_50px_-42px_rgba(15,23,42,0.2)]">
               <div className="flex items-center justify-between">
                 <p className="landing-label text-muted-foreground">Free</p>
-                {userPlan === "free" && (
+                {planInfo && !premiumActive && !premiumCanceled && (
                   <span className="rounded-full bg-accent px-3 py-1 text-[11px] font-semibold text-foreground">
                     Current plan
                   </span>
@@ -126,17 +177,17 @@ export function PricingTeaserContent({ userPlan }: Props) {
               </ul>
 
               <div className="mt-8">
-                {userPlan === null && (
+                {!planInfo && (
                   <Button variant="outline" className="landing-ui h-12 w-full" asChild>
                     <Link href="/login">Log in to subscribe</Link>
                   </Button>
                 )}
-                {userPlan === "free" && (
+                {planInfo && !premiumActive && !premiumCanceled && (
                   <Button variant="outline" className="landing-ui h-12 w-full" disabled>
                     Current plan
                   </Button>
                 )}
-                {userPlan === "premium" && (
+                {(premiumActive || premiumCanceled) && (
                   <Button variant="outline" className="landing-ui h-12 w-full" asChild>
                     <Link href="/pricing">Change subscription</Link>
                   </Button>
@@ -149,10 +200,14 @@ export function PricingTeaserContent({ userPlan }: Props) {
             <div className="flex h-full flex-col rounded-[28px] border border-foreground/10 bg-foreground p-8 text-background shadow-[0_28px_70px_-42px_rgba(15,23,42,0.34)]">
               <div className="flex items-center justify-between">
                 <p className="landing-label text-background/60">Premium</p>
-                {userPlan === "premium" ? (
+                {premiumActive ? (
                   <span className="flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold text-background/80">
                     <Sparkles className="h-3 w-3" />
                     Current plan
+                  </span>
+                ) : premiumCanceled ? (
+                  <span className="flex items-center gap-1 rounded-full bg-amber-500/20 px-3 py-1 text-[11px] font-semibold text-amber-300">
+                    Cancels {formatDate(planInfo!.periodEnd!)}
                   </span>
                 ) : (
                   <span className="flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold text-background/80">
@@ -186,7 +241,7 @@ export function PricingTeaserContent({ userPlan }: Props) {
               </ul>
 
               <div className="mt-8 space-y-3">
-                {userPlan === null && (
+                {!planInfo && (
                   <Button
                     className="landing-ui h-12 w-full bg-background text-foreground hover:bg-background/90"
                     asChild
@@ -194,22 +249,36 @@ export function PricingTeaserContent({ userPlan }: Props) {
                     <Link href={`/login?plan=premium&billing=${billing}`}>Log in to subscribe</Link>
                   </Button>
                 )}
-                {userPlan === "free" && (
+                {planInfo && !premiumActive && !premiumCanceled && (
                   <Button
                     className="landing-ui h-12 w-full bg-background text-foreground hover:bg-background/90"
                     onClick={handleUpgrade}
-                    disabled={isLoading}
+                    disabled={isUpgradeLoading}
                   >
-                    {isLoading ? "Redirecting to checkout…" : "Upgrade to Premium"}
+                    {isUpgradeLoading ? "Redirecting to checkout…" : "Upgrade to Premium"}
                   </Button>
                 )}
-                {userPlan === "premium" && (
+                {premiumActive && (
                   <Button
                     className="landing-ui h-12 w-full bg-background text-foreground hover:bg-background/90"
                     disabled
                   >
                     Current plan
                   </Button>
+                )}
+                {premiumCanceled && (
+                  <>
+                    <Button
+                      className="landing-ui h-12 w-full bg-background text-foreground hover:bg-background/90"
+                      onClick={handleReactivate}
+                      disabled={isReactivateLoading}
+                    >
+                      {isReactivateLoading ? "Reactivating…" : "Reactivate subscription"}
+                    </Button>
+                    <p className="landing-small text-center text-background/50">
+                      No charge — resumes your existing billing cycle
+                    </p>
+                  </>
                 )}
                 {error && (
                   <p className="landing-small rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-2.5 text-red-300">

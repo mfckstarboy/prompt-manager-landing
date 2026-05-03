@@ -15,20 +15,22 @@ function getServiceRoleClient() {
   });
 }
 
-async function upsertPremiumEntitlement(
-  userId: string,
-  customerId: string,
-  periodEnd: string | null
-) {
+async function upsertPremiumEntitlement(params: {
+  userId: string;
+  customerId: string;
+  subscriptionId: string | null;
+  periodEnd: string | null;
+}) {
   const supabase = getServiceRoleClient();
   const { error } = await supabase.from("user_entitlements").upsert(
     {
-      user_id: userId,
+      user_id: params.userId,
       plan: "premium",
       status: "active",
       provider: "dodo",
-      current_period_end: periodEnd,
-      dodo_customer_id: customerId,
+      current_period_end: params.periodEnd,
+      provider_customer_id: params.customerId,
+      provider_subscription_id: params.subscriptionId,
     },
     { onConflict: "user_id" }
   );
@@ -36,11 +38,26 @@ async function upsertPremiumEntitlement(
   if (error) throw new Error(error.message);
 }
 
-async function downgradeToFree(userId: string) {
+// User cancelled — keep plan as "premium" so they retain access until current_period_end.
+async function scheduledCancellation(params: {
+  userId: string;
+  periodEnd: string | null;
+}) {
   const supabase = getServiceRoleClient();
   const { error } = await supabase
     .from("user_entitlements")
-    .update({ plan: "free", status: "canceled" })
+    .update({ status: "canceled", current_period_end: params.periodEnd })
+    .eq("user_id", params.userId);
+
+  if (error) throw new Error(error.message);
+}
+
+// Billing period ended — remove premium access now.
+async function expireToFree(userId: string) {
+  const supabase = getServiceRoleClient();
+  const { error } = await supabase
+    .from("user_entitlements")
+    .update({ plan: "free", status: "expired" })
     .eq("user_id", userId);
 
   if (error) throw new Error(error.message);
@@ -77,10 +94,11 @@ export async function POST(request: NextRequest) {
       const sub = event.data;
       const userId = sub.metadata?.userId;
       const customerId = sub.customer.customer_id;
+      const subscriptionId = sub.subscription_id;
       const periodEnd = sub.next_billing_date ?? null;
 
       if (userId) {
-        await upsertPremiumEntitlement(userId, customerId, periodEnd);
+        await upsertPremiumEntitlement({ userId, customerId, subscriptionId, periodEnd });
       }
     } else if (event.type === "payment.succeeded") {
       const payment = event.data;
@@ -88,17 +106,24 @@ export async function POST(request: NextRequest) {
       const customerId = payment.customer.customer_id;
 
       if (userId) {
-        await upsertPremiumEntitlement(userId, customerId, null);
+        await upsertPremiumEntitlement({ userId, customerId, subscriptionId: null, periodEnd: null });
       }
-    } else if (
-      event.type === "subscription.cancelled" ||
-      event.type === "subscription.expired"
-    ) {
+    } else if (event.type === "subscription.cancelled") {
+      // User cancelled — keep premium access until current_period_end.
+      const sub = event.data;
+      const userId = sub.metadata?.userId;
+      const periodEnd = sub.next_billing_date ?? null;
+
+      if (userId) {
+        await scheduledCancellation({ userId, periodEnd });
+      }
+    } else if (event.type === "subscription.expired") {
+      // Billing period ended — actually remove premium access.
       const sub = event.data;
       const userId = sub.metadata?.userId;
 
       if (userId) {
-        await downgradeToFree(userId);
+        await expireToFree(userId);
       }
     }
   } catch (err) {

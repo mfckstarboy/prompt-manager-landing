@@ -1,14 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 
-import { PricingTeaserContent } from "./pricing-teaser-content";
+import { PricingTeaserContent, type PlanInfo } from "./pricing-teaser-content";
 
-type EntitlementRow = {
-  current_period_end: string | null;
-  plan: string;
-  status: string;
-};
-
-async function getUserPlan(): Promise<"free" | "premium" | null> {
+async function getUserPlanInfo(): Promise<PlanInfo | null> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -16,22 +10,22 @@ async function getUserPlan(): Promise<"free" | "premium" | null> {
 
   if (!user) return null;
 
-  const { data: entitlement } = await supabase
+  const { data } = await supabase
     .from("user_entitlements")
     .select("plan, status, current_period_end")
     .eq("user_id", user.id)
     .maybeSingle();
 
-  const row = entitlement as EntitlementRow | null;
-  const isPremium =
-    row?.plan === "premium" &&
-    row?.status === "active" &&
-    (!row.current_period_end || new Date(row.current_period_end) > new Date());
+  if (!data) return { plan: "free", status: "inactive", periodEnd: null };
 
-  return isPremium ? "premium" : "free";
+  return {
+    plan: data.plan as "free" | "premium",
+    status: data.status as PlanInfo["status"],
+    periodEnd: data.current_period_end ?? null,
+  };
 }
 
 export async function PricingTeaser() {
-  const userPlan = await getUserPlan();
-  return <PricingTeaserContent userPlan={userPlan} />;
+  const planInfo = await getUserPlanInfo();
+  return <PricingTeaserContent planInfo={planInfo} />;
 }

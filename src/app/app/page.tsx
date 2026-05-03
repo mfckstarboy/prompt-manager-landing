@@ -94,7 +94,7 @@ function formatRelativeTime(value: string) {
 function getDashboardPlan(entitlement: EntitlementRow | null) {
   const isPremium =
     entitlement?.plan === "premium" &&
-    entitlement?.status === "active" &&
+    (entitlement?.status === "active" || entitlement?.status === "canceled") &&
     (!entitlement.current_period_end ||
       new Date(entitlement.current_period_end) > new Date());
 

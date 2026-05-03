@@ -285,16 +285,34 @@ function ExtensionSuccessContent() {
           {state.message}
         </div>
 
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <Button asChild className="landing-ui h-12 flex-1 gap-2">
-            <a href="https://chatgpt.com/" target="_blank" rel="noreferrer">
-              Open ChatGPT
-            </a>
-          </Button>
-          <Button asChild variant="outline" className="landing-ui h-12 flex-1">
-            <Link href="/app">Open dashboard</Link>
-          </Button>
+        <div className="space-y-3">
+          <p className="landing-small text-center text-muted-foreground">Open in your AI tool</p>
+          <div className="grid grid-cols-4 gap-3">
+            {([
+              { name: "ChatGPT", href: "https://chatgpt.com/", icon: "/icons/chatgpt.svg" },
+              { name: "Claude", href: "https://claude.ai/", icon: "/icons/claude.svg" },
+              { name: "Gemini", href: "https://gemini.google.com/", icon: "/icons/gemini.png" },
+              { name: "Perplexity", href: "https://www.perplexity.ai/", icon: "/icons/perplexity.svg" },
+            ] as const).map((service) => (
+              <a
+                key={service.name}
+                href={service.href}
+                target="_blank"
+                rel="noreferrer"
+                className="group flex flex-col items-center gap-2"
+              >
+                <div className="flex h-14 w-14 items-center justify-center rounded-full border border-border/70 bg-background/85 shadow-[0_8px_24px_-12px_rgba(15,23,42,0.20)] transition-all duration-200 group-hover:border-primary/30 group-hover:shadow-[0_12px_32px_-12px_rgba(59,130,246,0.25)]">
+                  <img src={service.icon} alt={service.name} className="h-[22px] w-[22px] object-contain" />
+                </div>
+                <span className="landing-small text-center text-muted-foreground">{service.name}</span>
+              </a>
+            ))}
+          </div>
         </div>
+
+        <Button asChild variant="outline" className="landing-ui h-12 w-full">
+          <Link href="/app">Open dashboard</Link>
+        </Button>
 
         {state.status === "error" ? (
           <div className="flex flex-col items-center gap-2">

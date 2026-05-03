@@ -50,20 +50,25 @@ export function CancelDialog({ open, periodEnd, isLoading, error, onConfirm, onC
 
         <p className="landing-body mt-3 text-muted-foreground">
           {periodEnd
-            ? `Your Premium access continues until ${formatDate(periodEnd)}. After that your account switches to the free plan.`
-            : "Your Premium access will continue until the end of your current billing period."}
+            ? `You keep Premium until ${formatDate(periodEnd)}, then switch to the free plan. Your prompts are never deleted.`
+            : "You keep Premium until the end of your billing period. Your prompts are never deleted."}
         </p>
 
-        <ul className="mt-4 space-y-1.5">
-          {["Unlimited prompts & categories", "Variables in prompts", "Version history"].map(
-            (feature) => (
-              <li key={feature} className="landing-small flex items-center gap-2 text-muted-foreground">
-                <span className="h-1 w-1 shrink-0 rounded-full bg-muted-foreground/50" />
-                {feature} — removed when period ends
+        <div className="mt-4 space-y-2">
+          <p className="landing-small font-medium text-foreground">What changes on the free plan:</p>
+          <ul className="space-y-2">
+            {[
+              "Your prompts stay — but if you're over 30 prompts or 5 categories you won't be able to add more until you're within the limits or upgrade again",
+              "Variables in prompts stop working",
+              "Version history is no longer accessible",
+            ].map((item) => (
+              <li key={item} className="landing-small flex items-start gap-2 text-muted-foreground">
+                <span className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-muted-foreground/50" />
+                {item}
               </li>
-            )
-          )}
-        </ul>
+            ))}
+          </ul>
+        </div>
 
         {error && (
           <p className="landing-small mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-red-700">

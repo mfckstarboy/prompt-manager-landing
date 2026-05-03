@@ -33,7 +33,7 @@ export async function POST() {
 
   const { data: entitlement } = await supabase
     .from("user_entitlements")
-    .select("plan, status, current_period_end, provider_subscription_id")
+    .select("plan, status, current_period_end, provider_subscription_id, provider_customer_id")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -52,17 +52,39 @@ export async function POST() {
     );
   }
 
-  if (!entitlement.provider_subscription_id) {
-    return NextResponse.json({ error: "No subscription ID on record" }, { status: 400 });
-  }
-
   try {
     const dodo = getDodoClient();
-    await dodo.subscriptions.update(entitlement.provider_subscription_id, {
+    const admin = getServiceRoleClient();
+
+    let subscriptionId = entitlement.provider_subscription_id as string | null;
+
+    // Accounts created before provider_subscription_id was stored: look it up via customer.
+    if (!subscriptionId && entitlement.provider_customer_id) {
+      const page = await dodo.subscriptions.list({
+        customer_id: entitlement.provider_customer_id as string,
+        status: "active",
+      });
+      const found = page.items?.[0];
+      if (found?.subscription_id) {
+        subscriptionId = found.subscription_id;
+        await admin
+          .from("user_entitlements")
+          .update({ provider_subscription_id: subscriptionId })
+          .eq("user_id", user.id);
+      }
+    }
+
+    if (!subscriptionId) {
+      return NextResponse.json(
+        { error: "Could not find your subscription. Please contact support." },
+        { status: 400 }
+      );
+    }
+
+    await dodo.subscriptions.update(subscriptionId, {
       cancel_at_next_billing_date: true,
     });
 
-    const admin = getServiceRoleClient();
     const { error: updateError } = await admin
       .from("user_entitlements")
       .update({ status: "canceled" })

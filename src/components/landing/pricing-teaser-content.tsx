@@ -6,6 +6,12 @@ import { useState } from "react";
 
 import { Reveal, RevealGroup, RevealItem } from "@/components/landing/landing-motion";
 import { Button } from "@/components/ui/button";
+import {
+  formatDate,
+  isPremiumActive,
+  isPremiumCanceled,
+  type PlanInfo,
+} from "@/lib/subscription";
 
 const FREE_HIGHLIGHTS = [
   "Works in ChatGPT, Claude, Gemini, Perplexity",
@@ -23,41 +29,10 @@ const PREMIUM_HIGHLIGHTS = [
   "Priority support",
 ];
 
-export type PlanInfo = {
-  plan: "free" | "premium";
-  status: "active" | "inactive" | "past_due" | "canceled" | "expired";
-  periodEnd: string | null;
-};
-
 type BillingPeriod = "monthly" | "yearly";
 
 interface Props {
   planInfo: PlanInfo | null;
-}
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
-function isPremiumActive(info: PlanInfo): boolean {
-  return (
-    info.plan === "premium" &&
-    (info.status === "active" || info.status === "past_due") &&
-    (!info.periodEnd || new Date(info.periodEnd) > new Date())
-  );
-}
-
-function isPremiumCanceled(info: PlanInfo): boolean {
-  return (
-    info.plan === "premium" &&
-    info.status === "canceled" &&
-    info.periodEnd !== null &&
-    new Date(info.periodEnd) > new Date()
-  );
 }
 
 export function PricingTeaserContent({ planInfo }: Props) {

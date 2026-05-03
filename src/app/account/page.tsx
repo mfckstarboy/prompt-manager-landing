@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowUpRight, CheckCircle2, LifeBuoy, Puzzle } from "lucide-react";
+import { ArrowUpRight, CheckCircle2, CreditCard, LifeBuoy, Puzzle } from "lucide-react";
 
+import { SubscriptionActions } from "@/app/app/subscription-actions";
 import { PromptTrayLogo } from "@/components/landing/prompttray-logo";
 import { Button } from "@/components/ui/button";
+import { formatDate, isPremiumActive, isPremiumCanceled, type PlanInfo } from "@/lib/subscription";
 import { createClient } from "@/lib/supabase/server";
 
 import { AccountSettingsForm } from "./account-settings-form";
@@ -32,6 +34,24 @@ export default async function AccountRoute() {
   if (!user) {
     redirect("/login");
   }
+
+  const { data: entitlementRow } = await supabase
+    .from("user_entitlements")
+    .select("plan, status, current_period_end")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  const planInfo: PlanInfo | null = entitlementRow
+    ? {
+        plan: entitlementRow.plan as PlanInfo["plan"],
+        status: entitlementRow.status as PlanInfo["status"],
+        periodEnd: entitlementRow.current_period_end ?? null,
+      }
+    : null;
+
+  const premiumActive = planInfo ? isPremiumActive(planInfo) : false;
+  const premiumCanceled = planInfo ? isPremiumCanceled(planInfo) : false;
+  const isPremium = premiumActive || premiumCanceled;
 
   return (
     <main className="landing-page min-h-screen bg-[#f6f7fb] text-foreground">
@@ -144,6 +164,50 @@ export default async function AccountRoute() {
                     <LifeBuoy className="h-4 w-4" />
                   </Link>
                 </Button>
+              </div>
+            </section>
+
+            {/* Subscription section */}
+            <section className="rounded-[28px] border border-border/80 bg-card p-6 shadow-[0_20px_50px_-42px_rgba(15,23,42,0.2)]">
+              <div className="flex items-start gap-3">
+                <div className="rounded-xl bg-accent p-2.5 text-primary">
+                  <CreditCard className="h-4 w-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="landing-label text-muted-foreground">Subscription</p>
+                  <div className="mt-1 flex items-center gap-2">
+                    <p className="landing-h4 text-base text-foreground">
+                      {isPremium ? "Premium" : "Free plan"}
+                    </p>
+                    {premiumCanceled && (
+                      <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+                        Canceling
+                      </span>
+                    )}
+                  </div>
+                  {planInfo?.periodEnd && isPremium && (
+                    <p className="landing-small mt-1 text-muted-foreground">
+                      {premiumActive
+                        ? `Renews ${formatDate(planInfo.periodEnd)}`
+                        : `Access until ${formatDate(planInfo.periodEnd)}`}
+                    </p>
+                  )}
+                  {!isPremium && (
+                    <p className="landing-small mt-1 text-muted-foreground">
+                      30 prompts · 5 categories
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-4">
+                {planInfo && isPremium ? (
+                  <SubscriptionActions planInfo={planInfo} />
+                ) : (
+                  <Button asChild className="landing-ui h-10 w-full">
+                    <Link href="/pricing">Upgrade to Premium</Link>
+                  </Button>
+                )}
               </div>
             </section>
 

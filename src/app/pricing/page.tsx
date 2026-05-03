@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { PromptTrayLogo } from "@/components/landing/prompttray-logo";
+import { type PlanInfo } from "@/lib/subscription";
 import { createClient } from "@/lib/supabase/server";
 
 import { PricingContent } from "./pricing-content";
@@ -15,6 +16,22 @@ export default async function PricingPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  let planInfo: PlanInfo | null = null;
+  if (user) {
+    const { data } = await supabase
+      .from("user_entitlements")
+      .select("plan, status, current_period_end")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    planInfo = data
+      ? {
+          plan: data.plan as PlanInfo["plan"],
+          status: data.status as PlanInfo["status"],
+          periodEnd: data.current_period_end ?? null,
+        }
+      : { plan: "free", status: "inactive", periodEnd: null };
+  }
 
   const isAuthenticated = Boolean(user);
 
@@ -57,7 +74,7 @@ export default async function PricingPage() {
           </p>
         </div>
 
-        <PricingContent isAuthenticated={isAuthenticated} />
+        <PricingContent planInfo={planInfo} isAuthenticated={isAuthenticated} />
       </div>
     </main>
   );

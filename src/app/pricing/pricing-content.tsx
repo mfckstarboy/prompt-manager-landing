@@ -1,10 +1,18 @@
 "use client";
 
+import { Check, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { Check } from "lucide-react";
 import { useState } from "react";
 
+import { CancelDialog } from "@/components/subscription/cancel-dialog";
+import { ReactivateDialog } from "@/components/subscription/reactivate-dialog";
 import { Button } from "@/components/ui/button";
+import {
+  formatDate,
+  isPremiumActive,
+  isPremiumCanceled,
+  type PlanInfo,
+} from "@/lib/subscription";
 
 const FREE_FEATURES = [
   "Up to 30 prompts",
@@ -23,76 +31,131 @@ const PREMIUM_FEATURES = [
   "Priority support",
 ];
 
-export function PricingContent({ isAuthenticated }: { isAuthenticated: boolean }) {
+interface Props {
+  planInfo: PlanInfo | null;
+  isAuthenticated: boolean;
+}
+
+export function PricingContent({ planInfo, isAuthenticated }: Props) {
   const [interval, setInterval] = useState<"monthly" | "annual">("monthly");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [isUpgradeLoading, setIsUpgradeLoading] = useState(false);
+  const [upgradeError, setUpgradeError] = useState<string | null>(null);
+
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [isCancelLoading, setIsCancelLoading] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
+
+  const [reactivateOpen, setReactivateOpen] = useState(false);
+  const [isReactivateLoading, setIsReactivateLoading] = useState(false);
+  const [reactivateError, setReactivateError] = useState<string | null>(null);
 
   const isAnnual = interval === "annual";
+  const premiumActive = planInfo ? isPremiumActive(planInfo) : false;
+  const premiumCanceled = planInfo ? isPremiumCanceled(planInfo) : false;
 
   async function handleUpgrade() {
-    setError(null);
-    setIsLoading(true);
-
+    setUpgradeError(null);
+    setIsUpgradeLoading(true);
     try {
       const response = await fetch("/api/checkout/create-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ interval }),
       });
-
       if (!response.ok) {
         const data = (await response.json()) as { error?: string };
         throw new Error(data.error ?? "Unable to start checkout.");
       }
-
       const { url } = (await response.json()) as { url: string };
       window.location.href = url;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
-      setIsLoading(false);
+      setUpgradeError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      setIsUpgradeLoading(false);
+    }
+  }
+
+  async function handleCancel() {
+    setCancelError(null);
+    setIsCancelLoading(true);
+    try {
+      const res = await fetch("/api/subscription/cancel", { method: "POST" });
+      if (!res.ok) {
+        const data = (await res.json()) as { error?: string };
+        throw new Error(data.error ?? "Cancellation failed.");
+      }
+      window.location.reload();
+    } catch (err) {
+      setCancelError(err instanceof Error ? err.message : "Something went wrong.");
+      setIsCancelLoading(false);
+    }
+  }
+
+  async function handleReactivate() {
+    setReactivateError(null);
+    setIsReactivateLoading(true);
+    try {
+      const res = await fetch("/api/subscription/reactivate", { method: "POST" });
+      if (!res.ok) {
+        const data = (await res.json()) as { error?: string };
+        throw new Error(data.error ?? "Reactivation failed.");
+      }
+      window.location.reload();
+    } catch (err) {
+      setReactivateError(err instanceof Error ? err.message : "Something went wrong.");
+      setIsReactivateLoading(false);
     }
   }
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-center">
-        <div className="flex items-center gap-1 rounded-full border border-border bg-background p-1">
-          <button
-            type="button"
-            onClick={() => setInterval("monthly")}
-            className={`landing-small rounded-full px-5 py-2 font-medium transition-colors duration-150 ${
-              !isAnnual
-                ? "bg-foreground text-background"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Monthly
-          </button>
-          <button
-            type="button"
-            onClick={() => setInterval("annual")}
-            className={`landing-small flex items-center gap-2 rounded-full px-5 py-2 font-medium transition-colors duration-150 ${
-              isAnnual
-                ? "bg-foreground text-background"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Annual
-            <span
-              className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                isAnnual ? "bg-white/20 text-background" : "bg-emerald-100 text-emerald-700"
+      {/* Billing toggle — only show for non-premium users */}
+      {!premiumActive && !premiumCanceled && (
+        <div className="flex justify-center">
+          <div className="flex items-center gap-1 rounded-full border border-border bg-background p-1">
+            <button
+              type="button"
+              onClick={() => setInterval("monthly")}
+              className={`landing-small rounded-full px-5 py-2 font-medium transition-colors duration-150 ${
+                !isAnnual
+                  ? "bg-foreground text-background"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              Save 20%
-            </span>
-          </button>
+              Monthly
+            </button>
+            <button
+              type="button"
+              onClick={() => setInterval("annual")}
+              className={`landing-small flex items-center gap-2 rounded-full px-5 py-2 font-medium transition-colors duration-150 ${
+                isAnnual
+                  ? "bg-foreground text-background"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Annual
+              <span
+                className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                  isAnnual ? "bg-white/20 text-background" : "bg-emerald-100 text-emerald-700"
+                }`}
+              >
+                Save 20%
+              </span>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="grid gap-6 md:grid-cols-2">
-        <div className="rounded-[28px] border border-border/80 bg-card p-8 shadow-[0_20px_50px_-42px_rgba(15,23,42,0.2)]">
-          <p className="landing-label text-muted-foreground">Free</p>
+        {/* Free card */}
+        <div className="flex flex-col rounded-[28px] border border-border/80 bg-card p-8 shadow-[0_20px_50px_-42px_rgba(15,23,42,0.2)]">
+          <div className="flex items-center justify-between">
+            <p className="landing-label text-muted-foreground">Free</p>
+            {isAuthenticated && !premiumActive && !premiumCanceled && (
+              <span className="rounded-full bg-accent px-3 py-1 text-[11px] font-semibold text-foreground">
+                Current plan
+              </span>
+            )}
+          </div>
           <div className="mt-3 flex items-end gap-1">
             <span
               className="text-[42px] leading-none tracking-[-0.03em] text-foreground"
@@ -104,7 +167,7 @@ export function PricingContent({ isAuthenticated }: { isAuthenticated: boolean }
           </div>
           <p className="landing-small mt-2 text-muted-foreground">Forever free. No card needed.</p>
 
-          <ul className="mt-6 space-y-3">
+          <ul className="mt-6 grow space-y-3">
             {FREE_FEATURES.map((feature) => (
               <li key={feature} className="landing-small flex items-center gap-2.5 text-foreground">
                 <Check className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -114,36 +177,67 @@ export function PricingContent({ isAuthenticated }: { isAuthenticated: boolean }
           </ul>
 
           <div className="mt-8">
-            {isAuthenticated ? (
+            {!isAuthenticated && (
+              <Button asChild variant="outline" className="landing-ui h-12 w-full">
+                <Link href="/signup">Get started free</Link>
+              </Button>
+            )}
+            {isAuthenticated && !premiumActive && !premiumCanceled && (
               <Button variant="outline" className="landing-ui h-12 w-full" disabled>
                 Current plan
               </Button>
-            ) : (
-              <Button asChild variant="outline" className="landing-ui h-12 w-full">
-                <Link href="/signup">Get started free</Link>
+            )}
+            {(premiumActive || premiumCanceled) && (
+              <Button variant="outline" className="landing-ui h-12 w-full" asChild>
+                <Link href="/app">Go to dashboard</Link>
               </Button>
             )}
           </div>
         </div>
 
-        <div className="rounded-[28px] border border-foreground/10 bg-foreground p-8 text-background shadow-[0_28px_70px_-42px_rgba(15,23,42,0.34)]">
-          <p className="landing-label text-background/60">Premium</p>
+        {/* Premium card */}
+        <div className="flex flex-col rounded-[28px] border border-foreground/10 bg-foreground p-8 text-background shadow-[0_28px_70px_-42px_rgba(15,23,42,0.34)]">
+          <div className="flex items-center justify-between">
+            <p className="landing-label text-background/60">Premium</p>
+            {premiumActive ? (
+              <span className="flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold text-background/80">
+                <Sparkles className="h-3 w-3" />
+                Current plan
+              </span>
+            ) : premiumCanceled ? (
+              <span className="rounded-full bg-amber-500/20 px-3 py-1 text-[11px] font-semibold text-amber-300">
+                Cancels {formatDate(planInfo!.periodEnd!)}
+              </span>
+            ) : (
+              <span className="flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold text-background/80">
+                <Sparkles className="h-3 w-3" />
+                Most popular
+              </span>
+            )}
+          </div>
+
           <div className="mt-3 flex items-end gap-1">
             <span
               className="text-[42px] leading-none tracking-[-0.03em] text-background"
               style={{ fontFamily: "Instrument Serif, serif", fontWeight: 400 }}
             >
-              {isAnnual ? "$48" : "$5"}
+              {premiumActive || premiumCanceled ? (isAnnual ? "$48" : "$5") : isAnnual ? "$48" : "$5"}
             </span>
             <span className="landing-small mb-1 text-background/60">
               {isAnnual ? "/ year" : "/ month"}
             </span>
           </div>
           <p className="landing-small mt-2 text-background/60">
-            {isAnnual ? "$4 / month — save 20%" : "Billed monthly"}
+            {premiumActive && planInfo?.periodEnd
+              ? `Renews ${formatDate(planInfo.periodEnd)}`
+              : premiumCanceled && planInfo?.periodEnd
+                ? `Access until ${formatDate(planInfo.periodEnd)}`
+                : isAnnual
+                  ? "$4 / month — save 20%"
+                  : "Billed monthly"}
           </p>
 
-          <ul className="mt-6 space-y-3">
+          <ul className="mt-6 grow space-y-3">
             {PREMIUM_FEATURES.map((feature) => (
               <li key={feature} className="landing-small flex items-center gap-2.5 text-background">
                 <Check className="h-4 w-4 shrink-0 text-background/60" />
@@ -153,18 +247,13 @@ export function PricingContent({ isAuthenticated }: { isAuthenticated: boolean }
           </ul>
 
           <div className="mt-8 space-y-3">
-            {isAuthenticated ? (
-              <Button
-                className="landing-ui h-12 w-full bg-background text-foreground hover:bg-background/90"
-                onClick={handleUpgrade}
-                disabled={isLoading}
-              >
-                {isLoading ? "Redirecting to checkout…" : "Upgrade to Premium"}
-              </Button>
-            ) : (
+            {!isAuthenticated && (
               <>
-                <Button asChild className="landing-ui h-12 w-full bg-background text-foreground hover:bg-background/90">
-                  <Link href="/signup?plan=premium">Sign up & upgrade</Link>
+                <Button
+                  asChild
+                  className="landing-ui h-12 w-full bg-background text-foreground hover:bg-background/90"
+                >
+                  <Link href="/signup?plan=premium">Sign up &amp; upgrade</Link>
                 </Button>
                 <p className="landing-small text-center text-background/60">
                   Already have an account?{" "}
@@ -174,11 +263,50 @@ export function PricingContent({ isAuthenticated }: { isAuthenticated: boolean }
                 </p>
               </>
             )}
-            {error ? (
+            {isAuthenticated && !premiumActive && !premiumCanceled && (
+              <Button
+                className="landing-ui h-12 w-full bg-background text-foreground hover:bg-background/90"
+                onClick={handleUpgrade}
+                disabled={isUpgradeLoading}
+              >
+                {isUpgradeLoading ? "Redirecting to checkout…" : "Upgrade to Premium"}
+              </Button>
+            )}
+            {premiumActive && (
+              <>
+                <Button
+                  className="landing-ui h-12 w-full bg-background text-foreground hover:bg-background/90"
+                  disabled
+                >
+                  Current plan
+                </Button>
+                <button
+                  onClick={() => setCancelOpen(true)}
+                  className="landing-small w-full text-center text-background/40 transition-colors hover:text-background/70"
+                >
+                  Cancel subscription
+                </button>
+              </>
+            )}
+            {premiumCanceled && (
+              <>
+                <Button
+                  className="landing-ui h-12 w-full bg-background text-foreground hover:bg-background/90"
+                  onClick={() => setReactivateOpen(true)}
+                  disabled={isReactivateLoading}
+                >
+                  Reactivate subscription
+                </Button>
+                <p className="landing-small text-center text-background/50">
+                  No charge — resumes your existing billing cycle
+                </p>
+              </>
+            )}
+            {upgradeError && (
               <p className="landing-small rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-2.5 text-red-300">
-                {error}
+                {upgradeError}
               </p>
-            ) : null}
+            )}
           </div>
         </div>
       </div>
@@ -189,6 +317,22 @@ export function PricingContent({ isAuthenticated }: { isAuthenticated: boolean }
           Contact support
         </a>
       </p>
+
+      <CancelDialog
+        open={cancelOpen}
+        periodEnd={planInfo?.periodEnd ?? null}
+        isLoading={isCancelLoading}
+        error={cancelError}
+        onConfirm={handleCancel}
+        onClose={() => { setCancelOpen(false); setCancelError(null); }}
+      />
+      <ReactivateDialog
+        open={reactivateOpen}
+        isLoading={isReactivateLoading}
+        error={reactivateError}
+        onConfirm={handleReactivate}
+        onClose={() => { setReactivateOpen(false); setReactivateError(null); }}
+      />
     </div>
   );
 }

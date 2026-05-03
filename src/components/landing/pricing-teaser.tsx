@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 
-import { PricingTeaserContent, type PlanInfo } from "./pricing-teaser-content";
+import { type PlanInfo } from "@/lib/subscription";
+
+import { PricingTeaserContent } from "./pricing-teaser-content";
 
 async function getUserPlanInfo(): Promise<PlanInfo | null> {
   const supabase = await createClient();

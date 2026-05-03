@@ -25,6 +25,7 @@ import { createClient } from "@/lib/supabase/server";
 
 import { LogoutButton } from "./logout-button";
 import { PendingPlanRedirect } from "./pending-plan-redirect";
+import { SubscriptionActions } from "./subscription-actions";
 
 type CategoryRow = {
   id: string;
@@ -202,6 +203,13 @@ export default async function AppPage() {
   const totalCategories = safeCategories.length;
   const plan = getDashboardPlan((entitlement ?? null) as EntitlementRow | null);
   const isPremium = plan === "premium";
+  const subscriptionPlanInfo = entitlement
+    ? {
+        plan: entitlement.plan as "free" | "premium",
+        status: entitlement.status as "active" | "inactive" | "past_due" | "canceled" | "expired",
+        periodEnd: entitlement.current_period_end ?? null,
+      }
+    : null;
   const paywallState = getDashboardPaywallState({
     categoryCount: totalCategories,
     isPremium,
@@ -429,6 +437,7 @@ export default async function AppPage() {
                     Upgrade Plan
                   </Link>
                 )}
+                {subscriptionPlanInfo && <SubscriptionActions planInfo={subscriptionPlanInfo} />}
               </section>
 
               {/* Prompts overview */}

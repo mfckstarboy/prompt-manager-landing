@@ -1,5 +1,8 @@
+"use client";
+
 import { Check, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 import { Reveal, RevealGroup, RevealItem } from "@/components/landing/landing-motion";
 import { Button } from "@/components/ui/button";
@@ -20,15 +23,48 @@ const PREMIUM_HIGHLIGHTS = [
   "Priority support",
 ];
 
+type BillingPeriod = "monthly" | "yearly";
+
 export function PricingTeaser() {
+  const [billing, setBilling] = useState<BillingPeriod>("monthly");
+  const isYearly = billing === "yearly";
+
   return (
     <section id="pricing" className="px-6 py-24">
       <div className="mx-auto max-w-5xl">
-        <Reveal className="mb-16 text-center" variant="fade-up">
+        <Reveal className="mb-10 text-center" variant="fade-up">
           <h2 className="landing-h2 mb-4">Start free. Upgrade when you&apos;re ready.</h2>
           <p className="landing-body mx-auto max-w-xl text-muted-foreground">
             No lock-in, no card needed. Most users are surprised how far the free plan takes them.
           </p>
+        </Reveal>
+
+        <Reveal className="mb-10 flex justify-center" variant="fade-up">
+          <div className="flex items-center gap-1 rounded-full border border-border/70 bg-muted/40 p-1">
+            <button
+              onClick={() => setBilling("monthly")}
+              className={`rounded-full px-5 py-1.5 text-sm font-medium transition-all duration-200 ${
+                !isYearly
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Monthly
+            </button>
+            <button
+              onClick={() => setBilling("yearly")}
+              className={`flex items-center gap-1.5 rounded-full px-5 py-1.5 text-sm font-medium transition-all duration-200 ${
+                isYearly
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Yearly
+              <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700">
+                –20%
+              </span>
+            </button>
+          </div>
         </Reveal>
 
         <RevealGroup className="grid gap-6 md:grid-cols-2" stagger={80}>
@@ -74,15 +110,17 @@ export function PricingTeaser() {
               </div>
               <div className="mt-3 flex items-end gap-1">
                 <span
-                  className="text-[42px] leading-none tracking-[-0.03em] text-background"
+                  className="text-[42px] leading-none tracking-[-0.03em] text-background transition-all duration-200"
                   style={{ fontFamily: "Instrument Serif, serif", fontWeight: 400 }}
                 >
-                  $5
+                  {isYearly ? "$48" : "$5"}
                 </span>
-                <span className="landing-small mb-1 text-background/60">/ month</span>
+                <span className="landing-small mb-1 text-background/60">
+                  {isYearly ? "/ year" : "/ month"}
+                </span>
               </div>
               <p className="landing-small mt-2 text-background/60">
-                Or $48 / year — save 20%
+                {isYearly ? "That's $4 / month — save 20%" : "Or $48 / year — save 20%"}
               </p>
 
               <ul className="mt-6 grow space-y-3">
@@ -99,7 +137,7 @@ export function PricingTeaser() {
                   className="landing-ui h-12 w-full bg-background text-foreground hover:bg-background/90"
                   asChild
                 >
-                  <Link href="/login?plan=premium">Log in to subscribe</Link>
+                  <Link href={`/login?plan=premium&billing=${billing}`}>Log in to subscribe</Link>
                 </Button>
               </div>
             </div>

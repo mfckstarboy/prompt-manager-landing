@@ -28,8 +28,6 @@ export default function UpgradeSuccessPage() {
 
   useEffect(() => {
     cancelledRef.current = false;
-    let timeoutId: ReturnType<typeof setTimeout>;
-
     async function checkEntitlement() {
       if (cancelledRef.current) return;
 
@@ -61,7 +59,7 @@ export default function UpgradeSuccessPage() {
     }
 
     // Give the webhook ~2 s to land, then check once and show the result immediately.
-    timeoutId = setTimeout(() => void checkEntitlement(), 2000);
+    const timeoutId = setTimeout(() => void checkEntitlement(), 2000);
 
     return () => {
       cancelledRef.current = true;

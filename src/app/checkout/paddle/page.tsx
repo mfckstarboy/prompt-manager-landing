@@ -98,7 +98,7 @@ export default function PaddleCheckoutPage() {
       />
 
       <div className="grid min-h-screen lg:grid-cols-[0.94fr_1.06fr]">
-        <section className="flex min-h-[520px] flex-col bg-[#263f46] px-6 py-8 text-white sm:px-10 lg:min-h-screen lg:px-14 xl:px-16">
+        <section className="flex min-h-[520px] flex-col bg-[#333333] px-6 py-8 text-white sm:px-10 lg:min-h-screen lg:px-14 xl:px-16">
           <div className="flex items-center gap-4">
             <Link
               href="/pricing"
@@ -108,7 +108,7 @@ export default function PaddleCheckoutPage() {
               <ArrowLeft className="h-5 w-5" aria-hidden="true" />
             </Link>
             <PromptTrayLogo className="h-6 text-white" />
-            <span className="rounded bg-[#f4c95f] px-2.5 py-1 text-xs font-semibold uppercase text-[#263f46]">
+            <span className="rounded bg-[#f4c95f] px-2.5 py-1 text-xs font-semibold uppercase text-[#333333]">
               Test mode
             </span>
           </div>

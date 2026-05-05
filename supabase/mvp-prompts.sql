@@ -248,9 +248,9 @@ as $$
     from public.user_entitlements
     where user_id = check_user_id
       and plan = 'premium'
-      and status = 'active'
+      and status in ('active', 'past_due', 'canceled')
       and (
-        current_period_end is null
+        (status <> 'canceled' and current_period_end is null)
         or current_period_end > now()
       )
   );

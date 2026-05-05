@@ -24,7 +24,7 @@ export async function createPaddleCheckoutTransaction(params: {
   priceId: string;
   userId: string;
   plan: "premium";
-  redirectUrl: string;
+  checkoutPageUrl: string;
 }) {
   const paddle = getPaddleClient();
 
@@ -35,7 +35,7 @@ export async function createPaddleCheckoutTransaction(params: {
       plan: params.plan,
     },
     checkout: {
-      url: params.redirectUrl,
+      url: params.checkoutPageUrl,
     },
   });
 }

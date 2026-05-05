@@ -31,14 +31,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Payment not configured" }, { status: 500 });
   }
 
-  const redirectUrl = `${getSiteUrl()}/upgrade/success`;
+  const checkoutPageUrl = `${getSiteUrl()}/checkout/paddle`;
 
   try {
     const transaction = await createPaddleCheckoutTransaction({
       priceId,
       userId: user.id,
       plan: "premium",
-      redirectUrl,
+      checkoutPageUrl,
     });
 
     const checkoutUrl = transaction.checkout?.url;

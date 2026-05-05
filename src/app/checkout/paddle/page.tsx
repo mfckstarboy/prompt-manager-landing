@@ -6,6 +6,7 @@ import { useState } from "react";
 import Link from "next/link";
 
 import { PromptTrayLogo } from "@/components/landing/prompttray-logo";
+import { shouldSetPaddleSandbox } from "@/lib/paddle-env";
 
 declare global {
   interface Window {
@@ -61,7 +62,9 @@ export default function PaddleCheckoutPage() {
       return;
     }
 
-    window.Paddle.Environment.set("sandbox");
+    if (shouldSetPaddleSandbox()) {
+      window.Paddle.Environment.set("sandbox");
+    }
     window.Paddle.Initialize({
       token,
       checkout: {
@@ -87,6 +90,7 @@ export default function PaddleCheckoutPage() {
   const renewalText =
     billing === "annual" ? "Renews annually until canceled." : "Renews monthly until canceled.";
   const billingLabel = billing === "annual" ? "Annual" : "Monthly";
+  const isSandbox = shouldSetPaddleSandbox();
 
   return (
     <main className="landing-page min-h-screen bg-[#fbfcfe] text-foreground">
@@ -108,9 +112,11 @@ export default function PaddleCheckoutPage() {
               <ArrowLeft className="h-5 w-5" aria-hidden="true" />
             </Link>
             <PromptTrayLogo className="h-6 text-white" />
-            <span className="rounded bg-[#f4c95f] px-2.5 py-1 text-xs font-semibold uppercase text-[#333333]">
-              Test mode
-            </span>
+            {isSandbox && (
+              <span className="rounded bg-[#f4c95f] px-2.5 py-1 text-xs font-semibold uppercase text-[#333333]">
+                Test mode
+              </span>
+            )}
           </div>
 
           <div className="mt-12 max-w-md lg:mt-16">

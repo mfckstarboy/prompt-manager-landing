@@ -21,6 +21,7 @@ import {
 
 import { PromptTrayLogo } from "@/components/landing/prompttray-logo";
 import { CHROME_WEB_STORE_URL } from "@/lib/chrome-web-store";
+import { isPremiumActive, type PlanInfo } from "@/lib/subscription";
 import { createClient } from "@/lib/supabase/server";
 
 import { LogoutButton } from "./logout-button";
@@ -93,13 +94,20 @@ function formatRelativeTime(value: string) {
 }
 
 function getDashboardPlan(entitlement: EntitlementRow | null) {
-  const isPremium =
-    entitlement?.plan === "premium" &&
-    (entitlement?.status === "active" || entitlement?.status === "canceled") &&
-    (!entitlement.current_period_end ||
-      new Date(entitlement.current_period_end) > new Date());
+  const planInfo = entitlement
+    ? ({
+        plan: entitlement.plan,
+        status: entitlement.status,
+        periodEnd: entitlement.current_period_end,
+      } as PlanInfo)
+    : null;
+  const isScheduledCancellation =
+    planInfo?.plan === "premium" &&
+    planInfo.status === "canceled" &&
+    planInfo.periodEnd !== null &&
+    new Date(planInfo.periodEnd) > new Date();
 
-  return isPremium ? "premium" : "free";
+  return planInfo && (isPremiumActive(planInfo) || isScheduledCancellation) ? "premium" : "free";
 }
 
 function getDashboardPaywallState({

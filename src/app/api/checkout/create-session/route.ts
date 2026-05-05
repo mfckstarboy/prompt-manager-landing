@@ -1,23 +1,8 @@
-import DodoPayments from "dodopayments";
 import { NextRequest, NextResponse } from "next/server";
 
+import { createPaddleCheckoutTransaction } from "@/lib/paddle";
 import { getSiteUrl } from "@/lib/site-url";
 import { createClient } from "@/lib/supabase/server";
-
-function getDodoClient() {
-  const apiKey = process.env.DODO_API_KEY;
-
-  if (!apiKey) {
-    throw new Error("DODO_API_KEY is not configured.");
-  }
-
-  const isTestMode = process.env.DODO_ENV === "test_mode" || process.env.NODE_ENV !== "production";
-
-  return new DodoPayments({
-    bearerToken: apiKey,
-    environment: isTestMode ? "test_mode" : "live_mode",
-  });
-}
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -37,30 +22,26 @@ export async function POST(request: NextRequest) {
     interval = "monthly";
   }
 
-  const productId =
+  const priceId =
     interval === "annual"
-      ? process.env.DODO_ANNUAL_PRODUCT_ID
-      : process.env.DODO_MONTHLY_PRODUCT_ID;
+      ? process.env.PADDLE_ANNUAL_PRICE_ID
+      : process.env.PADDLE_MONTHLY_PRICE_ID;
 
-  if (!productId) {
+  if (!priceId) {
     return NextResponse.json({ error: "Payment not configured" }, { status: 500 });
   }
 
   const redirectUrl = `${getSiteUrl()}/upgrade/success`;
 
   try {
-    const dodo = getDodoClient();
-
-    const session = await dodo.checkoutSessions.create({
-      product_cart: [{ product_id: productId, quantity: 1 }],
-      metadata: {
-        userId: user.id,
-        plan: "premium",
-      },
-      return_url: redirectUrl,
+    const transaction = await createPaddleCheckoutTransaction({
+      priceId,
+      userId: user.id,
+      plan: "premium",
+      redirectUrl,
     });
 
-    const checkoutUrl = session.checkout_url;
+    const checkoutUrl = transaction.checkout?.url;
 
     if (!checkoutUrl) {
       return NextResponse.json({ error: "No checkout URL returned" }, { status: 500 });

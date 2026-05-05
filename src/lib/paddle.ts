@@ -54,6 +54,28 @@ export async function removePaddleScheduledCancellation(subscriptionId: string) 
   });
 }
 
+export async function getPaddleSubscriptionBillingInterval(subscriptionId: string) {
+  const paddle = getPaddleClient();
+  const subscription = await paddle.subscriptions.get(subscriptionId);
+  const interval = subscription.billingCycle.interval;
+
+  if (interval === "year") return "annual";
+  if (interval === "month") return "monthly";
+  return null;
+}
+
+export async function switchPaddleSubscriptionToAnnual(subscriptionId: string) {
+  const annualPriceId = process.env.PADDLE_ANNUAL_PRICE_ID;
+  if (!annualPriceId) throw new Error("Annual plan is not configured.");
+
+  const paddle = getPaddleClient();
+  return paddle.subscriptions.update(subscriptionId, {
+    items: [{ priceId: annualPriceId, quantity: 1 }],
+    onPaymentFailure: "prevent_change",
+    prorationBillingMode: "prorated_immediately",
+  });
+}
+
 export async function unmarshalPaddleWebhook(rawBody: string, signature: string) {
   const webhookSecret = process.env.PADDLE_WEBHOOK_SECRET;
   if (!webhookSecret) throw new Error("PADDLE_WEBHOOK_SECRET is not configured.");

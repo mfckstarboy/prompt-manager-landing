@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { PromptTrayLogo } from "@/components/landing/prompttray-logo";
+import { getPaddleSubscriptionBillingInterval } from "@/lib/paddle";
 import { type PlanInfo } from "@/lib/subscription";
 import { createClient } from "@/lib/supabase/server";
 
@@ -21,16 +22,27 @@ export default async function PricingPage() {
   if (user) {
     const { data } = await supabase
       .from("user_entitlements")
-      .select("plan, status, current_period_end")
+      .select("plan, status, current_period_end, provider_subscription_id")
       .eq("user_id", user.id)
       .maybeSingle();
+    let billingInterval: PlanInfo["billingInterval"] = null;
+
+    if (data?.provider_subscription_id) {
+      try {
+        billingInterval = await getPaddleSubscriptionBillingInterval(data.provider_subscription_id);
+      } catch {
+        billingInterval = null;
+      }
+    }
+
     planInfo = data
       ? {
+          billingInterval,
           plan: data.plan as PlanInfo["plan"],
           status: data.status as PlanInfo["status"],
           periodEnd: data.current_period_end ?? null,
         }
-      : { plan: "free", status: "inactive", periodEnd: null };
+      : { billingInterval: null, plan: "free", status: "inactive", periodEnd: null };
   }
 
   const isAuthenticated = Boolean(user);

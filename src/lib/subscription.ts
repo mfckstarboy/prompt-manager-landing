@@ -1,4 +1,5 @@
 export type PlanInfo = {
+  billingInterval?: "monthly" | "annual" | null;
   plan: "free" | "premium";
   status: "active" | "inactive" | "past_due" | "canceled" | "expired";
   periodEnd: string | null;

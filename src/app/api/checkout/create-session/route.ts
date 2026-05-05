@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Payment not configured" }, { status: 500 });
   }
 
-  const checkoutPageUrl = `${getSiteUrl()}/checkout/paddle`;
+  const checkoutPageUrl = `${getSiteUrl()}/checkout/paddle?billing=${interval}`;
 
   try {
     const transaction = await createPaddleCheckoutTransaction({

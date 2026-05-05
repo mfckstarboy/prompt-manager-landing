@@ -1,18 +1,8 @@
 import { createClient as createSupabaseAdmin } from "@supabase/supabase-js";
-import DodoPayments from "dodopayments";
 import { NextResponse } from "next/server";
 
+import { removePaddleScheduledCancellation } from "@/lib/paddle";
 import { createClient } from "@/lib/supabase/server";
-
-function getDodoClient() {
-  const apiKey = process.env.DODO_API_KEY;
-  if (!apiKey) throw new Error("DODO_API_KEY is not configured.");
-  const isTestMode = process.env.DODO_ENV === "test_mode" || process.env.NODE_ENV !== "production";
-  return new DodoPayments({
-    bearerToken: apiKey,
-    environment: isTestMode ? "test_mode" : "live_mode",
-  });
-}
 
 function getServiceRoleClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -59,10 +49,7 @@ export async function POST() {
   }
 
   try {
-    const dodo = getDodoClient();
-    await dodo.subscriptions.update(entitlement.provider_subscription_id, {
-      cancel_at_next_billing_date: false,
-    });
+    await removePaddleScheduledCancellation(entitlement.provider_subscription_id);
 
     const admin = getServiceRoleClient();
     const { error: updateError } = await admin

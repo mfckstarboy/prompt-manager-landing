@@ -1,8 +1,9 @@
 "use client";
 
 import Script from "next/script";
-import { Check } from "lucide-react";
+import { ArrowLeft, Check } from "lucide-react";
 import { useState } from "react";
+import Link from "next/link";
 
 import { PromptTrayLogo } from "@/components/landing/prompttray-logo";
 
@@ -82,10 +83,13 @@ export default function PaddleCheckoutPage() {
   }
 
   const price = billing === "annual" ? "$48" : "$5";
-  const cadence = billing === "annual" ? "/ year" : "/ month";
+  const cadence = billing === "annual" ? "per year" : "per month";
+  const renewalText =
+    billing === "annual" ? "Renews annually until canceled." : "Renews monthly until canceled.";
+  const billingLabel = billing === "annual" ? "Annual" : "Monthly";
 
   return (
-    <main className="landing-page flex min-h-screen flex-col bg-[#f6f7fb] text-foreground">
+    <main className="landing-page min-h-screen bg-[#fbfcfe] text-foreground">
       <Script
         src="https://cdn.paddle.com/paddle/v2/paddle.js"
         strategy="afterInteractive"
@@ -93,58 +97,108 @@ export default function PaddleCheckoutPage() {
         onError={() => setMessage("Checkout could not load. Please refresh the page.")}
       />
 
-      <div className="border-b border-border/80 bg-background/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center px-6 py-4">
-          <PromptTrayLogo className="h-6 text-foreground" />
-        </div>
-      </div>
-
-      <div className="mx-auto grid w-full max-w-6xl flex-1 gap-8 px-6 py-10 lg:grid-cols-[0.86fr_1.14fr] lg:items-start lg:py-14">
-        <section className="rounded-[28px] border border-border/80 bg-background p-7 shadow-[0_28px_70px_-52px_rgba(15,23,42,0.28)] sm:p-9">
-          <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">
-            PromptTray Premium
-          </p>
-          <h1 className="mt-5 font-serif text-4xl leading-tight text-foreground sm:text-5xl">
-            Finish your upgrade
-          </h1>
-          <p className="mt-4 text-base leading-7 text-muted-foreground">
-            Unlimited prompts, categories, variables, version history, and priority support.
-          </p>
-
-          <div className="mt-8 rounded-2xl bg-[#f7f4ef] p-5">
-            <div className="flex items-end gap-2">
-              <span className="font-serif text-5xl text-foreground">{price}</span>
-              <span className="pb-2 text-muted-foreground">{cadence}</span>
-            </div>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Tax is included where Paddle is required to collect it.
-            </p>
+      <div className="grid min-h-screen lg:grid-cols-[0.94fr_1.06fr]">
+        <section className="flex min-h-[520px] flex-col bg-[#263f46] px-6 py-8 text-white sm:px-10 lg:min-h-screen lg:px-14 xl:px-16">
+          <div className="flex items-center gap-4">
+            <Link
+              href="/pricing"
+              aria-label="Back to pricing"
+              className="flex h-9 w-9 items-center justify-center rounded-full text-white/65 transition hover:bg-white/10 hover:text-white"
+            >
+              <ArrowLeft className="h-5 w-5" aria-hidden="true" />
+            </Link>
+            <PromptTrayLogo className="h-6 text-white" />
+            <span className="rounded bg-[#f4c95f] px-2.5 py-1 text-xs font-semibold uppercase text-[#263f46]">
+              Test mode
+            </span>
           </div>
 
-          <ul className="mt-8 space-y-4 text-sm text-foreground">
+          <div className="mt-12 max-w-md lg:mt-16">
+            <p className="text-base font-semibold text-white/70">Subscribe to PromptTray Premium</p>
+            <div className="mt-4 flex items-end gap-3">
+              <span className="font-serif text-6xl leading-none text-white sm:text-7xl">{price}</span>
+              <span className="pb-2 text-sm font-semibold text-white/75">{cadence}</span>
+            </div>
+            <p className="mt-5 text-sm leading-6 text-white/62">{renewalText}</p>
+          </div>
+
+          <div className="mt-12 max-w-md space-y-6 text-sm lg:mt-16">
+            <div className="flex items-start justify-between gap-6">
+              <div>
+                <p className="font-semibold text-white">PromptTray Premium</p>
+                <p className="mt-1 text-white/58">Billed {billingLabel.toLowerCase()}</p>
+              </div>
+              <p className="font-semibold text-white">{price}</p>
+            </div>
+
+            <div className="border-t border-white/14 pt-6">
+              <div className="flex items-center justify-between">
+                <p className="text-white/78">Subtotal</p>
+                <p className="font-semibold text-white">{price}</p>
+              </div>
+              <div className="mt-5 flex items-center justify-between">
+                <p className="text-white/58">Tax</p>
+                <p className="text-white/58">Included</p>
+              </div>
+            </div>
+
+            <div className="border-t border-white/14 pt-6">
+              <div className="flex items-center justify-between text-base">
+                <p className="font-semibold text-white">Total today</p>
+                <p className="font-semibold text-white">{price}</p>
+              </div>
+            </div>
+          </div>
+
+          <ul className="mt-10 grid max-w-md gap-3 text-sm text-white/74">
             {[
               "Unlimited prompts and categories",
-              "Variables in prompts",
-              "Version history",
+              "Variables and version history",
               "Sync across devices",
               "Priority support",
             ].map((feature) => (
               <li key={feature} className="flex items-center gap-3">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#d9f8df] text-[#147a35]">
-                  <Check className="h-4 w-4" aria-hidden="true" />
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/12 text-[#d9f8df]">
+                  <Check className="h-3.5 w-3.5" aria-hidden="true" />
                 </span>
                 <span>{feature}</span>
               </li>
             ))}
           </ul>
+
+          <div className="mt-auto hidden pt-12 text-xs text-white/45 lg:block">
+            <span>Powered by Paddle</span>
+            <span className="mx-4 text-white/20">|</span>
+            <Link href="/privacy" className="hover:text-white/75">
+              Privacy
+            </Link>
+            <span className="mx-4 text-white/20">|</span>
+            <Link href="/terms" className="hover:text-white/75">
+              Terms
+            </Link>
+          </div>
         </section>
 
-        <section className="rounded-[28px] border border-border/80 bg-background p-3 shadow-[0_28px_70px_-52px_rgba(15,23,42,0.28)] sm:p-5">
-          <div className="border-b border-border/80 px-3 py-4 sm:px-4">
-            <h2 className="text-lg font-semibold text-foreground">Secure checkout</h2>
-            <p className="mt-1 text-sm text-muted-foreground">{message}</p>
+        <section className="flex items-start justify-center px-5 py-8 sm:px-8 lg:min-h-screen lg:px-12 lg:py-10 xl:px-16">
+          <div className="w-full max-w-[560px]">
+            <div className="mb-8 lg:hidden">
+              <PromptTrayLogo className="h-6 text-foreground" />
+            </div>
+
+            <div className="mb-8">
+              <h1 className="font-serif text-4xl leading-tight text-foreground sm:text-5xl">
+                Secure checkout
+              </h1>
+              <p className="mt-3 text-sm text-muted-foreground">{message}</p>
+            </div>
+
+            <div className="paddle-checkout-frame min-h-[620px] w-full" />
+
+            <p className="mt-8 text-center text-xs leading-6 text-muted-foreground">
+              By confirming your subscription, you authorize Paddle to charge your selected
+              payment method for recurring payments according to the plan terms.
+            </p>
           </div>
-          <div className="paddle-checkout-frame min-h-[560px] w-full" />
         </section>
       </div>
     </main>

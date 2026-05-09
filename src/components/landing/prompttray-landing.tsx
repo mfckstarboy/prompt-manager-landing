@@ -1,4 +1,5 @@
 import { CTA } from "@/components/landing/cta";
+import { FAQ } from "@/components/landing/faq";
 import { Features } from "@/components/landing/features";
 import { Footer } from "@/components/landing/footer";
 import { Header } from "@/components/landing/header";
@@ -18,6 +19,7 @@ export default function PromptTrayLanding({ isLoggedIn = false }: { isLoggedIn?:
       <HowItWorks />
       <UseCases />
       <PricingTeaser />
+      <FAQ />
       <CTA />
       <Footer />
     </main>

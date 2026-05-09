@@ -5,6 +5,9 @@ import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 type Node = {
+  driftPhase: number;
+  driftRadius: number;
+  driftSpeed: number;
   radius: number;
   vx: number;
   vy: number;
@@ -87,6 +90,9 @@ export function ConstellationBackground({
     };
 
     const createNode = (): Node => ({
+      driftPhase: Math.random() * Math.PI * 2,
+      driftRadius: 14 + Math.random() * 30,
+      driftSpeed: 0.00018 + Math.random() * 0.00032,
       radius: Math.random() * nodeSize + nodeSize * 0.55,
       vx: (Math.random() - 0.5) * 0.18,
       vy: (Math.random() - 0.5) * 0.18,
@@ -127,9 +133,19 @@ export function ConstellationBackground({
     resizeObserver.observe(container);
 
     const animate = () => {
+      const time = performance.now();
       context.clearRect(0, 0, width, height);
 
       for (const node of nodes) {
+        const driftAngle = time * node.driftSpeed + node.driftPhase;
+        const driftTargetX =
+          node.x + Math.cos(driftAngle) * node.driftRadius * 0.0028;
+        const driftTargetY =
+          node.y + Math.sin(driftAngle * 1.15) * node.driftRadius * 0.0022;
+
+        node.vx += (driftTargetX - node.x) * 0.0024;
+        node.vy += (driftTargetY - node.y) * 0.0024;
+
         const dx = node.x - mouseX;
         const dy = node.y - mouseY;
         const distance = Math.sqrt(dx * dx + dy * dy);
@@ -142,10 +158,10 @@ export function ConstellationBackground({
 
         node.x += node.vx;
         node.y += node.vy;
-        node.vx *= 0.992;
-        node.vy *= 0.992;
-        node.vx += (Math.random() - 0.5) * 0.0025;
-        node.vy += (Math.random() - 0.5) * 0.0025;
+        node.vx *= 0.994;
+        node.vy *= 0.994;
+        node.vx += (Math.random() - 0.5) * 0.0013;
+        node.vy += (Math.random() - 0.5) * 0.0013;
 
         if (node.x < 0 || node.x > width) {
           node.vx *= -1;

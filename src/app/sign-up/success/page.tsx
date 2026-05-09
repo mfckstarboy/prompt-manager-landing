@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 export const metadata: Metadata = {
   title: "Account Created",
   description: "Your PromptTray account has been created successfully.",
+  robots: { index: false, follow: false },
 };
 
 export default function SignUpSuccessPage() {

@@ -14,14 +14,20 @@ export function Footer() {
           <PromptTrayLogo className="h-6 text-foreground" />
 
           <nav className="flex items-center gap-8">
+            <Link href="/pricing" className={footerLinkClassName}>
+              Pricing
+            </Link>
+            <Link href="/support" className={footerLinkClassName}>
+              Support
+            </Link>
             <Link href="/privacy" className={footerLinkClassName}>
               Privacy
             </Link>
             <Link href="/terms" className={footerLinkClassName}>
               Terms
             </Link>
-            <Link href="/support" className={footerLinkClassName}>
-              Support
+            <Link href="/refund" className={footerLinkClassName}>
+              Refund
             </Link>
           </nav>
 

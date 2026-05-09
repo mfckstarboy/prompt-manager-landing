@@ -8,7 +8,10 @@ import { createClient } from "@/lib/supabase/server";
 import { PricingContent } from "./pricing-content";
 
 export const metadata: Metadata = {
-  robots: { index: false, follow: false },
+  title: "AI Prompt Manager Pricing",
+  description:
+    "PromptTray pricing for a multi-platform AI prompt manager that works across ChatGPT, Claude, Gemini, and Perplexity.",
+  alternates: { canonical: "https://www.prompttray.app/pricing" },
 };
 
 export default async function PricingPage() {
@@ -70,7 +73,8 @@ export default async function PricingPage() {
             Simple, honest pricing
           </h1>
           <p className="landing-body mt-4 text-muted-foreground">
-            Start free. Upgrade when your prompt library grows.
+            Start free. Upgrade when your prompt library grows across ChatGPT, Claude, Gemini, and
+            Perplexity.
           </p>
         </div>
 

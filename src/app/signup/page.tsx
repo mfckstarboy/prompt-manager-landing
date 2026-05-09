@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, type FormEvent, useMemo, useState } from "react";
 
 import { AuthShell, authInputClassName, authLabelClassName } from "@/components/auth/auth-shell";
+import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 import { Button } from "@/components/ui/button";
 import {
   buildConfirmedPath,
@@ -100,7 +101,22 @@ function SignupPageContent() {
       hintText=""
       eyebrow={isExtensionFlow ? "Extension sign up" : undefined}
     >
-      <form className="space-y-4" onSubmit={handleSubmit}>
+      <div className="space-y-4">
+        <GoogleSignInButton
+          mode="signup"
+          extensionId={extensionId}
+          onError={(message) => setError(message || null)}
+          disabled={isLoading}
+        />
+
+        <div className="flex items-center gap-3">
+          <span className="h-px flex-1 bg-border" aria-hidden="true" />
+          <span className="landing-small text-muted-foreground">or</span>
+          <span className="h-px flex-1 bg-border" aria-hidden="true" />
+        </div>
+      </div>
+
+      <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
         <div className="grid gap-4">
           <div className="grid gap-2">
             <label htmlFor="signup-email" className={authLabelClassName}>

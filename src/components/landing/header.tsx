@@ -33,6 +33,12 @@ export function Header({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
             <a href="#use-cases" className={navLinkClassName}>
               Use cases
             </a>
+            <Link href="/pricing" className={navLinkClassName}>
+              Pricing
+            </Link>
+            <Link href="/support" className={navLinkClassName}>
+              Support
+            </Link>
           </nav>
 
           <div className="hidden items-center gap-3 md:flex">
@@ -85,6 +91,12 @@ export function Header({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
             >
               Use cases
             </a>
+            <Link href="/pricing" className="landing-nav text-muted-foreground hover:text-foreground">
+              Pricing
+            </Link>
+            <Link href="/support" className="landing-nav text-muted-foreground hover:text-foreground">
+              Support
+            </Link>
             <hr className="border-border" />
             {isLoggedIn ? (
               <Button asChild size="sm" className="landing-ui justify-start">

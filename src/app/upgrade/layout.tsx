@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
 
-import Demo from "@/components/ui/demo";
-
 export const metadata: Metadata = {
-  title: "Demo",
   robots: { index: false, follow: false },
 };
 
-export default function DemoPage() {
-  return <Demo />;
+export default function UpgradeLayout({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
 }

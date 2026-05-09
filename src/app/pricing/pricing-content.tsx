@@ -318,6 +318,54 @@ export function PricingContent({ planInfo, isAuthenticated }: Props) {
         </a>
       </p>
 
+      <div className="mx-auto max-w-3xl space-y-8 rounded-[28px] border border-border/80 bg-card px-6 py-8 shadow-[0_20px_50px_-42px_rgba(15,23,42,0.2)] sm:px-8">
+        <section>
+          <h2
+            className="text-[28px] leading-[32px] tracking-[-0.01em] text-foreground"
+            style={{ fontFamily: "Instrument Serif, serif", fontWeight: 400 }}
+          >
+            AI prompt manager pricing
+          </h2>
+          <p className="landing-body mt-4 text-muted-foreground">
+            PromptTray pricing is designed for people who want a reusable prompt workflow across
+            ChatGPT, Claude, Gemini, and Perplexity. The free plan gives you a simple way to save
+            and organize prompts, while Premium is built for people whose prompt library is growing
+            and needs more flexibility.
+          </p>
+        </section>
+
+        <section>
+          <h2
+            className="text-[28px] leading-[32px] tracking-[-0.01em] text-foreground"
+            style={{ fontFamily: "Instrument Serif, serif", fontWeight: 400 }}
+          >
+            Who the free plan is for
+          </h2>
+          <p className="landing-body mt-4 text-muted-foreground">
+            The free plan is a good fit if you are just starting to build a prompt library, only
+            save your best recurring prompts, or want a cleaner system than leaving them buried in
+            chat history. It covers the core workflow of saving, organizing, syncing, and reusing
+            prompts across the AI tools you already use.
+          </p>
+        </section>
+
+        <section>
+          <h2
+            className="text-[28px] leading-[32px] tracking-[-0.01em] text-foreground"
+            style={{ fontFamily: "Instrument Serif, serif", fontWeight: 400 }}
+          >
+            Who should upgrade to PromptTray Premium
+          </h2>
+          <p className="landing-body mt-4 text-muted-foreground">
+            PromptTray Premium makes sense when you rely on prompts daily, need unlimited prompts
+            and categories, or want more advanced prompt management features like variables and
+            version history. If you are maintaining reusable prompt workflows for writing, coding,
+            research, support, or team handoff across multiple AI platforms, Premium helps keep
+            that system easier to scale.
+          </p>
+        </section>
+      </div>
+
       <CancelDialog
         open={cancelOpen}
         periodEnd={planInfo?.periodEnd ?? null}

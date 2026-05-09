@@ -4,17 +4,17 @@ const steps = [
   {
     number: "01",
     title: "Save",
-    description: "Click the PromptTray button inside any AI tool to save your prompt. Takes one second.",
+    description: "Save a prompt directly from ChatGPT, Claude, Gemini, or Perplexity.",
   },
   {
     number: "02",
     title: "Organize",
-    description: "Add a category and thumbnail. Your library stays clean and searchable, even as it grows.",
+    description: "Add a category, tag, or variable so it stays easy to find later.",
   },
   {
     number: "03",
-    title: "Reuse",
-    description: "Search your library and insert any prompt with a single click. No retyping, ever.",
+    title: "Insert",
+    description: "Open the sidebar and insert the right prompt in one click.",
   },
 ];
 
@@ -23,9 +23,9 @@ export function HowItWorks() {
     <section id="how-it-works" className="bg-secondary px-6 py-24">
       <div className="mx-auto max-w-6xl">
         <Reveal className="mb-16 text-center" variant="fade-up">
-          <h2 className="landing-h2 mb-4">How it works</h2>
+          <h2 className="landing-h2 mb-4">From saved prompt to reusable workflow in under a minute</h2>
           <p className="landing-body mx-auto max-w-xl text-muted-foreground md:max-w-2xl">
-            Three steps. Ready in under a minute.
+            Set it up once, then reuse your best prompts everywhere.
           </p>
         </Reveal>
 

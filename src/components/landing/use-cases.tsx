@@ -6,34 +6,34 @@ const useCases = [
   {
     icon: Palette,
     role: "Designers",
-    quote: "I stopped rebuilding prompts for every iteration. My Midjourney and ChatGPT workflows finally feel like a real system.",
-    attribution: "— UX Designer",
+    summary:
+      "Save prompts for UI ideas, creative direction, moodboards, and research. Reuse them across iterations without rebuilding from scratch.",
     prompts: [
-      "Reusing the same prompts across multiple design iterations (Midjourney, UI ideas, moodboards)",
-      "Quickly testing variations without rebuilding prompts from scratch",
-      "Keeping research, UX, and visual prompts organized by project",
+      "Reuse the same prompts across design iterations",
+      "Test variations without rebuilding prompts from scratch",
+      "Keep research, UX, and visual prompts organized by project",
     ],
   },
   {
     icon: Code,
     role: "Developers",
-    quote: "Debugging prompts, code review templates, docs prompts — all one click away. It’s like muscle memory now.",
-    attribution: "— Software Developer",
+    summary:
+      "Keep debugging prompts, code review prompts, test prompts, and documentation templates one click away while you work.",
     prompts: [
-      "Reusing prompts for debugging, code review, and documentation",
-      "Switching between projects without losing context",
-      "Keeping structured prompts for common dev tasks (tests, refactoring, explanations)",
+      "Reuse prompts for debugging, code review, and documentation",
+      "Switch between projects without losing prompt context",
+      "Keep repeat prompts for tests, refactoring, and explanations",
     ],
   },
   {
     icon: Megaphone,
     role: "Marketers",
-    quote: "I built a prompt library for every campaign type. My team reuses what works instead of starting from scratch every time.",
-    attribution: "— Marketing Manager",
+    summary:
+      "Reuse proven prompts for landing pages, ads, emails, briefs, and content production across campaigns.",
     prompts: [
-      "Reusing high-performing prompts for ads, emails, and social content",
-      "Scaling content production without rewriting briefs",
-      "Keeping campaign prompts organized and ready to reuse",
+      "Reuse high-performing prompts for ads, emails, and social content",
+      "Scale content production without rewriting briefs",
+      "Keep campaign prompts organized and ready to reuse",
     ],
   },
 ];
@@ -43,9 +43,12 @@ export function UseCases() {
     <section id="use-cases" className="px-6 py-24">
       <div className="mx-auto max-w-6xl">
         <Reveal className="mb-16 text-center" variant="fade-up">
-          <h2 className="landing-h2 mb-4">Built for how you work</h2>
+          <h2 className="landing-h2 mb-4">
+            Built for real AI workflows
+          </h2>
           <p className="landing-body mx-auto max-w-xl text-muted-foreground md:max-w-2xl">
-            Whether you&apos;re designing, coding, or marketing — PromptTray fits your workflow.
+            Whether you write, design, code, or market, PromptTray helps you reuse what works
+            instead of starting over.
           </p>
         </Reveal>
 
@@ -60,17 +63,10 @@ export function UseCases() {
                   <span className="landing-h4">{useCase.role}</span>
                 </div>
 
-                <p className="landing-body text-muted-foreground">
-                  &ldquo;{useCase.quote}&rdquo;
-                </p>
-                <p className="landing-small mb-6 mt-2 text-muted-foreground/60">
-                  {useCase.attribution}
-                </p>
+                <p className="landing-body mb-6 text-muted-foreground">{useCase.summary}</p>
 
                 <div className="space-y-2">
-                  <p className="landing-label text-muted-foreground uppercase">
-                    How they use PromptTray
-                  </p>
+                  <p className="landing-label text-muted-foreground uppercase">Common workflows</p>
                   {useCase.prompts.map((prompt) => (
                     <div
                       key={prompt}

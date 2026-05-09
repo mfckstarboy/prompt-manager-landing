@@ -13,34 +13,34 @@ import { Reveal, RevealGroup, RevealItem } from "@/components/landing/landing-mo
 const features = [
   {
     icon: Save,
-    title: "Save prompts",
-    description: "Capture any prompt with one click. It's saved instantly — never rewrite it again.",
+    title: "Save prompts fast",
+    description: "Save any prompt in one click while you work. No extra tabs, no messy docs.",
   },
   {
     icon: FolderOpen,
-    title: "Categories & thumbnails",
-    description: "Organize prompts into categories with visual thumbnails. Find what you need at a glance.",
+    title: "Organize your library",
+    description: "Group prompts with categories and tags so everything stays easy to browse as your library grows.",
   },
   {
     icon: Search,
-    title: "Instant search",
-    description: "Find any prompt in milliseconds. Full-text search across your entire library.",
+    title: "Find prompts instantly",
+    description: "Search your full prompt library in seconds and pull up exactly what you need.",
   },
   {
     icon: MousePointerClick,
-    title: "One-click insert",
-    description: "Click once to insert any prompt into ChatGPT, Claude, Gemini, or Perplexity.",
+    title: "Insert anywhere",
+    description: "Drop any saved prompt into ChatGPT, Claude, Gemini, or Perplexity with one click.",
   },
   {
     icon: Braces,
-    title: "Prompt variables",
-    description: "Build reusable templates with [dynamic placeholders]. Fill in the blanks — not the whole prompt.",
+    title: "Use variables in prompts",
+    description: "Turn repeat prompts into reusable templates. Fill in the details instead of rewriting the whole thing.",
     premium: true,
   },
   {
     icon: History,
-    title: "Version history",
-    description: "Every edit is tracked. Roll back to any previous version of a prompt in one click.",
+    title: "Keep version history",
+    description: "Edit with confidence. Go back to earlier versions whenever you want.",
     premium: true,
   },
 ];
@@ -50,9 +50,10 @@ export function Features() {
     <section id="features" className="px-6 py-24">
       <div className="mx-auto max-w-6xl">
         <Reveal className="mb-16 text-center" variant="fade-up">
-          <h2 className="landing-h2 mb-4">Built for AI power users</h2>
+          <h2 className="landing-h2 mb-4">Everything you need in a prompt manager</h2>
           <p className="landing-body mx-auto max-w-xl text-muted-foreground md:max-w-2xl">
-            A clean sidebar that lives inside your AI tools — no tab switching, no copy-pasting.
+            PromptTray helps you save prompts, organize them, and reuse them inside the AI tools
+            you already use every day.
           </p>
         </Reveal>
 

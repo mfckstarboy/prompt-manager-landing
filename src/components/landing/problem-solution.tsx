@@ -1,33 +1,32 @@
 import { Check, X } from "lucide-react";
-
 import { Reveal, RevealGroup, RevealItem } from "@/components/landing/landing-motion";
 
 const problems = [
-  "Rewriting the same prompts from memory, every time",
-  "Great prompts lost forever in chat history",
-  "Copy-pasting from scattered notes and documents",
-  "No organization across different AI tools",
+  "Rewriting the same prompts from scratch",
+  "Losing useful prompts in old chats",
+  "Copy-pasting from docs, notes, and folders",
+  "Managing separate prompt lists for different AI tools",
 ];
 
 const solutions = [
-  "Entire prompt library, one click away",
-  "Permanent library synced across all your devices",
-  "Insert any prompt directly into any AI tool",
-  "Search across categories and prompts in milliseconds",
+  "One prompt library across every supported AI tool",
+  "One-click insert right inside the chat box",
+  "Categories, search, and reusable templates",
+  "Faster work with less repetition",
 ];
 
 export function ProblemSolution() {
   return (
-    <section className="bg-muted/30 px-6 py-24">
+    <section className="bg-gray-100 px-6 py-24">
       <div className="mx-auto max-w-6xl">
         <Reveal className="mb-16 text-center" variant="fade-up">
           <h2 className="landing-h2 mb-4 text-balance">
-            You&apos;re losing time to prompts you&apos;ve already written
+            Stop losing great prompts in chat history
           </h2>
           <p className="landing-body mx-auto max-w-2xl text-muted-foreground md:max-w-3xl">
-            AI power users waste hours every week recreating prompts from memory.{" "}
-            <br />
-            PromptTray fixes that permanently.
+            The best prompts are usually the ones you already wrote. PromptTray keeps them
+            organized, searchable, and ready to insert without switching tabs or digging through
+            notes.
           </p>
         </Reveal>
 

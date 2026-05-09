@@ -20,7 +20,7 @@ type ExtensionWelcomePageProps = {
 export const metadata: Metadata = {
   title: "Set Up PromptTray",
   description:
-    "Connect your account to start using PromptTray across your AI tools.",
+    "Create your free PromptTray account and start saving prompts across your AI tools.",
 };
 
 function getSearchParam(
@@ -44,18 +44,18 @@ export default async function ExtensionWelcomePage({
   const setupSteps = [
     {
       icon: ShieldCheck,
-      title: "Connect your account",
-      description: "A free account keeps your prompts synced across sessions.",
+      title: "Create or connect your account",
+      description: "A free account keeps your prompts synced across your AI workflow.",
     },
     {
       icon: Chrome,
-      title: "Return to your AI tool",
-      description: "PromptTray works inside ChatGPT, Claude, Gemini, and more.",
+      title: "Open your AI tool",
+      description: "PromptTray works inside ChatGPT, Claude, Gemini, and Perplexity.",
     },
     {
       icon: Library,
       title: "Save your first prompt",
-      description: "Open the sidebar and start building your library.",
+      description: "Use the sidebar to start building your prompt library.",
     },
   ];
 
@@ -80,10 +80,11 @@ export default async function ExtensionWelcomePage({
                   className="text-[38px] leading-[42px] tracking-[-0.02em] text-foreground sm:text-[46px] sm:leading-[50px] lg:text-[52px] lg:leading-[56px]"
                   style={{ fontFamily: "Instrument Serif, serif", fontWeight: 400 }}
                 >
-                  Your prompts, across every AI tool.
+                  Your prompt library, connected everywhere.
                 </h1>
                 <p className="mt-5 text-[17px] leading-7 text-muted-foreground">
-                  Connect your account once. PromptTray syncs your library everywhere you work.
+                  Create a free account once to sync your prompts across ChatGPT, Claude,
+                  Gemini, and Perplexity.
                 </p>
               </section>
             </Reveal>

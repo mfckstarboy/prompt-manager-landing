@@ -1,18 +1,8 @@
 import { createClient as createSupabaseAdmin } from "@supabase/supabase-js";
-import DodoPayments from "dodopayments";
 import { NextResponse } from "next/server";
 
+import { cancelPaddleSubscription } from "@/lib/paddle";
 import { createClient } from "@/lib/supabase/server";
-
-function getDodoClient() {
-  const apiKey = process.env.DODO_API_KEY;
-  if (!apiKey) throw new Error("DODO_API_KEY is not configured.");
-  const isTestMode = process.env.DODO_ENV === "test_mode" || process.env.NODE_ENV !== "production";
-  return new DodoPayments({
-    bearerToken: apiKey,
-    environment: isTestMode ? "test_mode" : "live_mode",
-  });
-}
 
 function getServiceRoleClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -33,7 +23,7 @@ export async function POST() {
 
   const { data: entitlement } = await supabase
     .from("user_entitlements")
-    .select("plan, status, current_period_end, provider_subscription_id, provider_customer_id")
+    .select("plan, status, current_period_end, provider_subscription_id")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -52,38 +42,17 @@ export async function POST() {
     );
   }
 
+  if (!entitlement.provider_subscription_id) {
+    return NextResponse.json(
+      { error: "Could not find your subscription. Please contact support." },
+      { status: 400 }
+    );
+  }
+
   try {
-    const dodo = getDodoClient();
     const admin = getServiceRoleClient();
 
-    let subscriptionId = entitlement.provider_subscription_id as string | null;
-
-    // Accounts created before provider_subscription_id was stored: look it up via customer.
-    if (!subscriptionId && entitlement.provider_customer_id) {
-      const page = await dodo.subscriptions.list({
-        customer_id: entitlement.provider_customer_id as string,
-        status: "active",
-      });
-      const found = page.items?.[0];
-      if (found?.subscription_id) {
-        subscriptionId = found.subscription_id;
-        await admin
-          .from("user_entitlements")
-          .update({ provider_subscription_id: subscriptionId })
-          .eq("user_id", user.id);
-      }
-    }
-
-    if (!subscriptionId) {
-      return NextResponse.json(
-        { error: "Could not find your subscription. Please contact support." },
-        { status: 400 }
-      );
-    }
-
-    await dodo.subscriptions.update(subscriptionId, {
-      cancel_at_next_billing_date: true,
-    });
+    await cancelPaddleSubscription(entitlement.provider_subscription_id);
 
     const { error: updateError } = await admin
       .from("user_entitlements")

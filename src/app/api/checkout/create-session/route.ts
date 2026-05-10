@@ -1,23 +1,9 @@
-import DodoPayments from "dodopayments";
 import { NextRequest, NextResponse } from "next/server";
 
+import { createPaddleCheckoutTransaction } from "@/lib/paddle";
 import { getSiteUrl } from "@/lib/site-url";
+import { isPremiumActive, isPremiumCanceled, type PlanInfo } from "@/lib/subscription";
 import { createClient } from "@/lib/supabase/server";
-
-function getDodoClient() {
-  const apiKey = process.env.DODO_API_KEY;
-
-  if (!apiKey) {
-    throw new Error("DODO_API_KEY is not configured.");
-  }
-
-  const isTestMode = process.env.DODO_ENV === "test_mode" || process.env.NODE_ENV !== "production";
-
-  return new DodoPayments({
-    bearerToken: apiKey,
-    environment: isTestMode ? "test_mode" : "live_mode",
-  });
-}
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -29,6 +15,37 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const { data: entitlement } = await supabase
+    .from("user_entitlements")
+    .select("plan, status, current_period_end")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  const planInfo = entitlement
+    ? ({
+        plan: entitlement.plan,
+        status: entitlement.status,
+        periodEnd: entitlement.current_period_end,
+      } as PlanInfo)
+    : null;
+
+  if (planInfo && isPremiumActive(planInfo)) {
+    return NextResponse.json(
+      { error: "You already have an active Premium subscription." },
+      { status: 409 }
+    );
+  }
+
+  if (planInfo && isPremiumCanceled(planInfo)) {
+    return NextResponse.json(
+      {
+        error:
+          "Your Premium subscription is still active until the end of the billing period. Reactivate it from pricing instead.",
+      },
+      { status: 409 }
+    );
+  }
+
   let interval: string;
   try {
     const body = (await request.json()) as { interval?: string };
@@ -37,30 +54,26 @@ export async function POST(request: NextRequest) {
     interval = "monthly";
   }
 
-  const productId =
+  const priceId =
     interval === "annual"
-      ? process.env.DODO_ANNUAL_PRODUCT_ID
-      : process.env.DODO_MONTHLY_PRODUCT_ID;
+      ? process.env.PADDLE_ANNUAL_PRICE_ID
+      : process.env.PADDLE_MONTHLY_PRICE_ID;
 
-  if (!productId) {
+  if (!priceId) {
     return NextResponse.json({ error: "Payment not configured" }, { status: 500 });
   }
 
-  const redirectUrl = `${getSiteUrl()}/upgrade/success`;
+  const checkoutPageUrl = `${getSiteUrl()}/checkout/paddle?billing=${interval}`;
 
   try {
-    const dodo = getDodoClient();
-
-    const session = await dodo.checkoutSessions.create({
-      product_cart: [{ product_id: productId, quantity: 1 }],
-      metadata: {
-        userId: user.id,
-        plan: "premium",
-      },
-      return_url: redirectUrl,
+    const transaction = await createPaddleCheckoutTransaction({
+      priceId,
+      userId: user.id,
+      plan: "premium",
+      checkoutPageUrl,
     });
 
-    const checkoutUrl = session.checkout_url;
+    const checkoutUrl = transaction.checkout?.url;
 
     if (!checkoutUrl) {
       return NextResponse.json({ error: "No checkout URL returned" }, { status: 500 });

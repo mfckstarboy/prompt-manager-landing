@@ -28,9 +28,7 @@ export default function UpgradeSuccessPage() {
 
   useEffect(() => {
     cancelledRef.current = false;
-    const timeoutId = setTimeout(() => void checkEntitlement(), 2000);
-
-    async function checkEntitlement() {
+    async function checkEntitlement(attempt = 0) {
       if (cancelledRef.current) return;
 
       try {
@@ -54,13 +52,30 @@ export default function UpgradeSuccessPage() {
 
         if (cancelledRef.current) return;
 
-        setVerifyState(isPremiumEntitlement(entitlement) ? "confirmed" : "pending");
+        if (isPremiumEntitlement(entitlement)) {
+          setVerifyState("confirmed");
+          return;
+        }
+
+        if (attempt < 10) {
+          window.setTimeout(() => void checkEntitlement(attempt + 1), 3000);
+          return;
+        }
+
+        setVerifyState("pending");
       } catch {
+        if (attempt < 10) {
+          window.setTimeout(() => void checkEntitlement(attempt + 1), 3000);
+          return;
+        }
+
         if (!cancelledRef.current) setVerifyState("pending");
       }
     }
 
-    // Give the webhook ~2 s to land, then check once and show the result immediately.
+    // Give the webhook a moment to land, then poll while Paddle/Supabase settle.
+    const timeoutId = setTimeout(() => void checkEntitlement(), 2000);
+
     return () => {
       cancelledRef.current = true;
       clearTimeout(timeoutId);
@@ -176,17 +191,17 @@ export default function UpgradeSuccessPage() {
               className="mt-6 text-[32px] leading-[36px] tracking-[-0.01em] text-foreground"
               style={{ fontFamily: "Instrument Serif, serif", fontWeight: 400 }}
             >
-              Payment not confirmed
+              Activation is still syncing
             </h1>
 
             <p className="landing-body mt-4 text-muted-foreground">
-              We could not confirm your payment. Your account has not been upgraded. Please try
-              again or contact support if you believe this is a mistake.
+              Your payment may have succeeded, but Premium has not appeared on this device yet.
+              Refresh the dashboard in a moment, or contact support if it still looks wrong.
             </p>
 
             <div className="mt-8 flex flex-col gap-3">
               <Button asChild className="landing-ui h-12 w-full">
-                <Link href="/pricing">Try once more</Link>
+                <Link href="/app">Go to dashboard</Link>
               </Button>
               <Button asChild variant="outline" className="landing-ui h-12 w-full">
                 <Link href="/support">Contact support</Link>

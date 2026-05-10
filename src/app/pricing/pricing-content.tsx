@@ -7,6 +7,7 @@ import { useState } from "react";
 import { CancelDialog } from "@/components/subscription/cancel-dialog";
 import { ReactivateDialog } from "@/components/subscription/reactivate-dialog";
 import { Button } from "@/components/ui/button";
+import { getPremiumCtaState } from "@/lib/pricing-state";
 import {
   formatDate,
   isPremiumActive,
@@ -37,8 +38,11 @@ interface Props {
 }
 
 export function PricingContent({ planInfo, isAuthenticated }: Props) {
-  const [interval, setInterval] = useState<"monthly" | "annual">("monthly");
+  const [interval, setInterval] = useState<"monthly" | "annual">(
+    planInfo?.billingInterval ?? "monthly"
+  );
   const [isUpgradeLoading, setIsUpgradeLoading] = useState(false);
+  const [isPlanChangeLoading, setIsPlanChangeLoading] = useState(false);
   const [upgradeError, setUpgradeError] = useState<string | null>(null);
 
   const [cancelOpen, setCancelOpen] = useState(false);
@@ -52,6 +56,13 @@ export function PricingContent({ planInfo, isAuthenticated }: Props) {
   const isAnnual = interval === "annual";
   const premiumActive = planInfo ? isPremiumActive(planInfo) : false;
   const premiumCanceled = planInfo ? isPremiumCanceled(planInfo) : false;
+  const premiumCta = getPremiumCtaState({
+    isAuthenticated,
+    premiumActive,
+    premiumCanceled,
+    currentInterval: planInfo?.billingInterval ?? null,
+    selectedInterval: interval,
+  });
 
   async function handleUpgrade() {
     setUpgradeError(null);
@@ -71,6 +82,26 @@ export function PricingContent({ planInfo, isAuthenticated }: Props) {
     } catch (err) {
       setUpgradeError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
       setIsUpgradeLoading(false);
+    }
+  }
+
+  async function handlePlanChange() {
+    setUpgradeError(null);
+    setIsPlanChangeLoading(true);
+    try {
+      const response = await fetch("/api/subscription/change-plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ interval }),
+      });
+      if (!response.ok) {
+        const data = (await response.json()) as { error?: string };
+        throw new Error(data.error ?? "Unable to update subscription.");
+      }
+      window.location.reload();
+    } catch (err) {
+      setUpgradeError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      setIsPlanChangeLoading(false);
     }
   }
 
@@ -108,8 +139,7 @@ export function PricingContent({ planInfo, isAuthenticated }: Props) {
 
   return (
     <div className="space-y-8">
-      {/* Billing toggle — only show for non-premium users */}
-      {!premiumActive && !premiumCanceled && (
+      {(premiumActive || !premiumCanceled) && (
         <div className="flex justify-center">
           <div className="flex items-center gap-1 rounded-full border border-border bg-background p-1">
             <button
@@ -188,8 +218,17 @@ export function PricingContent({ planInfo, isAuthenticated }: Props) {
               </Button>
             )}
             {(premiumActive || premiumCanceled) && (
-              <Button variant="outline" className="landing-ui h-12 w-full" asChild>
-                <Link href="/app">Go to dashboard</Link>
+              <Button
+                variant="outline"
+                className="landing-ui h-12 w-full"
+                disabled={premiumCanceled || isCancelLoading}
+                onClick={() => setCancelOpen(true)}
+              >
+                {premiumCanceled
+                  ? "Downgrade scheduled"
+                  : isCancelLoading
+                    ? "Downgrading..."
+                    : "Downgrade to Free"}
               </Button>
             )}
           </div>
@@ -199,7 +238,7 @@ export function PricingContent({ planInfo, isAuthenticated }: Props) {
         <div className="flex flex-col rounded-[28px] border border-foreground/10 bg-foreground p-8 text-background shadow-[0_28px_70px_-42px_rgba(15,23,42,0.34)]">
           <div className="flex items-center justify-between">
             <p className="landing-label text-background/60">Premium</p>
-            {premiumActive ? (
+            {premiumActive && planInfo?.billingInterval === interval ? (
               <span className="flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold text-background/80">
                 <Sparkles className="h-3 w-3" />
                 Current plan
@@ -228,8 +267,10 @@ export function PricingContent({ planInfo, isAuthenticated }: Props) {
             </span>
           </div>
           <p className="landing-small mt-2 text-background/60">
-            {premiumActive && planInfo?.periodEnd
+            {premiumActive && planInfo?.periodEnd && planInfo.billingInterval === interval
               ? `Renews ${formatDate(planInfo.periodEnd)}`
+              : premiumActive && planInfo?.billingInterval === "monthly" && isAnnual
+                ? "Upgrade from monthly to annual"
               : premiumCanceled && planInfo?.periodEnd
                 ? `Access until ${formatDate(planInfo.periodEnd)}`
                 : isAnnual
@@ -247,7 +288,7 @@ export function PricingContent({ planInfo, isAuthenticated }: Props) {
           </ul>
 
           <div className="mt-8 space-y-3">
-            {!isAuthenticated && (
+            {premiumCta.action === "signup" && (
               <>
                 <Button
                   asChild
@@ -263,7 +304,7 @@ export function PricingContent({ planInfo, isAuthenticated }: Props) {
                 </p>
               </>
             )}
-            {isAuthenticated && !premiumActive && !premiumCanceled && (
+            {premiumCta.action === "checkout" && (
               <Button
                 className="landing-ui h-12 w-full bg-background text-foreground hover:bg-background/90"
                 onClick={handleUpgrade}
@@ -272,23 +313,24 @@ export function PricingContent({ planInfo, isAuthenticated }: Props) {
                 {isUpgradeLoading ? "Redirecting to checkout…" : "Upgrade to Premium"}
               </Button>
             )}
-            {premiumActive && (
-              <>
-                <Button
-                  className="landing-ui h-12 w-full bg-background text-foreground hover:bg-background/90"
-                  disabled
-                >
-                  Current plan
-                </Button>
-                <button
-                  onClick={() => setCancelOpen(true)}
-                  className="landing-small w-full text-center text-background/40 transition-colors hover:text-background/70"
-                >
-                  Cancel subscription
-                </button>
-              </>
+            {premiumCta.action === "current" && (
+              <Button
+                className="landing-ui h-12 w-full bg-background text-foreground hover:bg-background/90"
+                disabled
+              >
+                Current plan
+              </Button>
             )}
-            {premiumCanceled && (
+            {premiumCta.action === "upgrade" && (
+              <Button
+                className="landing-ui h-12 w-full bg-background text-foreground hover:bg-background/90"
+                onClick={handlePlanChange}
+                disabled={isPlanChangeLoading}
+              >
+                {isPlanChangeLoading ? "Updating plan..." : "Upgrade plan"}
+              </Button>
+            )}
+            {premiumCta.action === "reactivate" && (
               <>
                 <Button
                   className="landing-ui h-12 w-full bg-background text-foreground hover:bg-background/90"

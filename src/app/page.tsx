@@ -4,21 +4,23 @@ import PromptTrayLanding from "@/components/landing/prompttray-landing";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Prompt Manager for ChatGPT, Claude, Gemini & Perplexity",
+  title: "AI Prompt Manager for ChatGPT, Claude & Gemini | PromptTray",
   description:
-    "PromptTray is a Chrome extension and prompt manager for ChatGPT, Claude, Gemini, and Perplexity. Save prompts, organize your library, and insert them anywhere in one click.",
+    "Your prompt library for every AI tool. Save, organize, and reuse prompts instantly across ChatGPT, Claude, Gemini, Perplexity, and more — one click away.",
   alternates: {
     canonical: "https://www.prompttray.app/",
   },
   keywords: [
     "AI prompt manager",
-    "ChatGPT prompt manager",
+    "prompt manager for ChatGPT",
+    "prompt manager for Claude",
+    "prompt manager for Gemini",
     "prompt organizer",
     "prompt library",
-    "ChatGPT prompts",
-    "save and organize prompts",
-    "organize AI prompts",
-    "Chrome extension for prompts",
+    "save AI prompts",
+    "reuse AI prompts",
+    "Chrome extension for AI prompts",
+    "multiplatform prompt manager",
     "AI workflow productivity",
     "manage prompts across ChatGPT Claude Gemini Perplexity",
   ],

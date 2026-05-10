@@ -4,10 +4,9 @@ import "./globals.css";
 import { getMetadataBase } from "@/lib/site-url";
 
 const siteUrl = getMetadataBase();
-const seoTitle = "Prompt Manager for ChatGPT, Claude, Gemini & Perplexity | PromptTray";
+const seoTitle = "AI Prompt Manager for ChatGPT, Claude & Gemini | PromptTray";
 const seoDescription =
-  "Save, organize, and reuse AI prompts across ChatGPT, Claude, Gemini, and Perplexity. PromptTray is a Chrome extension that keeps your best prompts one click away.";
-// TODO: Create /public/og-image.png at 1200×630px for proper social sharing previews
+  "Your prompt library for every AI tool. Save, organize, and reuse prompts instantly across ChatGPT, Claude, Gemini, Perplexity, and more — one click away.";
 const ogImage = "/og-image.png";
 
 export const metadata: Metadata = {

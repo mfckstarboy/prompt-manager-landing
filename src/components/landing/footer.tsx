@@ -32,10 +32,10 @@ export function Footer() {
           </nav>
 
           <a
-            href="mailto:support@prompttray.com"
+            href="mailto:support@prompttray.app"
             className="landing-nav text-muted-foreground transition-colors duration-200 hover:text-foreground"
           >
-            support@prompttray.com
+            support@prompttray.app
           </a>
         </div>
 

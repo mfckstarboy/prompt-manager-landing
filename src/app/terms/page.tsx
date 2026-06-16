@@ -64,10 +64,10 @@ export default function TermsPage() {
         <p>
           Questions about these terms can be sent to{" "}
           <a
-            href="mailto:support@prompttray.com"
+            href="mailto:support@prompttray.app"
             className="font-medium text-foreground transition-colors duration-200 hover:text-primary"
           >
-            support@prompttray.com
+            support@prompttray.app
           </a>
           .
         </p>

@@ -27,10 +27,10 @@ export default function RefundPage() {
         <p>
           Email{" "}
           <a
-            href="mailto:support@prompttray.com"
+            href="mailto:support@prompttray.app"
             className="font-medium text-foreground transition-colors duration-200 hover:text-primary"
           >
-            support@prompttray.com
+            support@prompttray.app
           </a>{" "}
           with the subject line &ldquo;Refund Request&rdquo; and include the email address on your
           account. We aim to respond within 2 business days.
@@ -63,10 +63,10 @@ export default function RefundPage() {
         <p>
           Questions about a charge or refund can be sent to{" "}
           <a
-            href="mailto:support@prompttray.com"
+            href="mailto:support@prompttray.app"
             className="font-medium text-foreground transition-colors duration-200 hover:text-primary"
           >
-            support@prompttray.com
+            support@prompttray.app
           </a>
           .
         </p>

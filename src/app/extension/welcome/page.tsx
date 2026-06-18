@@ -12,6 +12,7 @@ import { Reveal } from "@/components/landing/landing-motion";
 import { PromptTrayLogo } from "@/components/landing/prompttray-logo";
 import { Button } from "@/components/ui/button";
 import { getExtensionBridgeState, withExtensionBridge } from "@/lib/auth/extension-bridge";
+import { GuestModeLauncher } from "./guest-mode-launcher";
 
 type ExtensionWelcomePageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -20,7 +21,7 @@ type ExtensionWelcomePageProps = {
 export const metadata: Metadata = {
   title: "Set Up PromptTray",
   description:
-    "Create your free PromptTray account and start saving prompts across your AI tools.",
+    "Start PromptTray locally or create a free account to sync prompts across your AI tools.",
 };
 
 function getSearchParam(
@@ -44,8 +45,8 @@ export default async function ExtensionWelcomePage({
   const setupSteps = [
     {
       icon: ShieldCheck,
-      title: "Create or connect your account",
-      description: "A free account keeps your prompts synced across your AI workflow.",
+      title: "Start local or connect your account",
+      description: "Use PromptTray as a guest first, then create an account when you want sync.",
     },
     {
       icon: Chrome,
@@ -83,8 +84,8 @@ export default async function ExtensionWelcomePage({
                   Your prompt library, connected everywhere.
                 </h1>
                 <p className="mt-5 text-[17px] leading-7 text-muted-foreground">
-                  Create a free account once to sync your prompts across ChatGPT, Claude,
-                  Gemini, and Perplexity.
+                  Start as a guest and save prompts locally, or create a free account to sync
+                  across ChatGPT, Claude, Gemini, and Perplexity.
                 </p>
               </section>
             </Reveal>
@@ -139,6 +140,8 @@ export default async function ExtensionWelcomePage({
                         I already have an account
                       </Link>
                     </Button>
+
+                    <GuestModeLauncher />
                   </div>
                 </div>
               </section>

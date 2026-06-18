@@ -47,7 +47,7 @@ const AI_TOOLS = [
   {
     name: "Gemini",
     href: "https://gemini.google.com/app",
-    icon: "/icons/gemini.svg",
+    icon: "/logos/gemini.svg",
   },
   {
     name: "Perplexity",
@@ -71,7 +71,7 @@ export function WelcomeSetupPanel({
 
   return (
     <section className="h-full">
-      <div className="flex h-full flex-col rounded-[32px] border border-border/80 bg-card/96 p-6 shadow-[0_30px_80px_-46px_rgba(15,23,42,0.32)] backdrop-blur sm:p-8">
+      <div className="flex h-full min-h-[560px] flex-col rounded-[32px] border border-border/80 bg-card/96 p-6 shadow-[0_30px_80px_-46px_rgba(15,23,42,0.32)] backdrop-blur sm:p-8 lg:min-h-[584px]">
         {extensionWarning ? (
           <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-[14px] leading-6 text-amber-800">
             {extensionWarning}

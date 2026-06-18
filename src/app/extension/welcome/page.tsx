@@ -101,7 +101,7 @@ export default async function ExtensionWelcomePage({
                     </div>
                   ) : null}
 
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {setupSteps.map((step, index) => {
                       const Icon = step.icon;
 
@@ -126,7 +126,7 @@ export default async function ExtensionWelcomePage({
                     })}
                   </div>
 
-                  <div className="mt-6 flex flex-col gap-3 lg:mt-auto">
+                  <div className="mt-9 flex flex-col gap-3 sm:mt-10 lg:mt-12">
                     <Button asChild className="landing-ui h-12 w-full gap-2">
                       <Link href={signupHref}>
                         Create free account
